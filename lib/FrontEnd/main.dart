@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'pets_page.dart';
+import 'petshop_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomePage(),
-        '/pets': (context) => PetsPage(),
+        // '/pets': (context) => PetsPage(),
+        // '/Pet Shop': (context) => PetShopPage(),
       },
     );
   }

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
+import 'petshop_page.dart';
+import 'services.dart';
+import 'Side_Pages/notifications_page.dart';
+import 'calendar.dart';
 
 class PetsPage extends StatelessWidget {
   const PetsPage({Key? key}) : super(key: key);
@@ -16,6 +20,10 @@ class PetsPage extends StatelessWidget {
             IconButton(
               onPressed: () {
                 // Navigate to notifications
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationsPage()),
+                );
               },
               icon: Icon(Icons.notifications),
             ),
@@ -67,16 +75,16 @@ class PetsPage extends StatelessWidget {
             label: 'Pets',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital),
-            label: 'Providers',
+            icon: Icon(Icons.shopping_bag),
+            label: 'Pet Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
-            label: 'To Dos',
+            label: 'Services',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
-            label: 'Appointments',
+            label: '',
           ),
         ],
         onTap: (index) {
@@ -91,6 +99,25 @@ class PetsPage extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => PetsPage()),
+            );
+          }else if (index == 2) {
+            // Navigate to pets page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PetShopPage()),
+            );
+          }
+          else if (index == 3) {
+            // Navigate to pets page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ServicesPage()),
+            );
+          }else if (index == 4) {
+            // Navigate to pets page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CalendarPage()),
             );
           }
         },

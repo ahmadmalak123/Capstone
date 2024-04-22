@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'pets_page.dart';
+import 'petshop_page.dart';
+import 'Side_Pages/profile_page.dart';
+import 'Side_Pages/notifications_page.dart';
+import 'services.dart';
+import 'calendar.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -16,7 +21,7 @@ class HomePage extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.menu),
+                    icon: Icon(Icons.pets),
                     onPressed: () {
                       // Open drawer or navigate to settings
                     },
@@ -33,12 +38,20 @@ class HomePage extends StatelessWidget {
                     icon: Icon(Icons.notifications),
                     onPressed: () {
                       // Navigate to notifications
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => NotificationsPage()),
+                      );
                     },
                   ),
                   IconButton(
                     icon: Icon(Icons.settings),
                     onPressed: () {
-                      // Navigate to settings
+                      // Navigate to profile page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()),
+                      );
                     },
                   ),
                 ],
@@ -116,12 +129,12 @@ class HomePage extends StatelessWidget {
             label: 'Pets',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.local_hospital),
-            label: 'Providers',
+            icon: Icon(Icons.shopping_bag),
+            label: 'Pet Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
-            label: 'To Dos',
+            label: 'Services',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
@@ -141,19 +154,25 @@ class HomePage extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => PetsPage()),
             );
-          }/* else if (index == 2) {
+          }else if (index == 2) {
+            // Navigate to pets page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PetShopPage()),
+            );
+          } else if (index == 3) {
             // Navigate to providers page
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ProvidersPage()),
+              MaterialPageRoute(builder: (context) => ServicesPage()),
             );
-          } else if (index == 3) {
+          } else if (index == 4) {
             // Navigate to to-dos page
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => TodosPage()),
+              MaterialPageRoute(builder: (context) => CalendarPage()),
             );
-          } else if (index == 4) {
+          } /*else if (index == 4) {
             // Navigate to appointments page
             Navigator.push(
               context,
@@ -201,4 +220,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
