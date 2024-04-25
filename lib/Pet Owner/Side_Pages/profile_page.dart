@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../home_page.dart';
+import 'notifications_settings_page.dart'; // Import the notification settings page
+
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -71,8 +72,15 @@ class ProfilePage extends StatelessWidget {
   Widget _buildProfileRow(IconData icon, String title, BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to respective page
-        // Implementation goes here
+        if (title == 'Notification Settings') {
+          // Navigate to notification settings page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NotificationSettingsPage()),
+          );
+        } else {
+          // Navigate to respective page (other options)
+        }
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -96,4 +104,5 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+
 
