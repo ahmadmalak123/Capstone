@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'notifications_settings_page.dart'; // Import the notification settings page
+import 'notifications_settings_page.dart';
+import 'appointment_history_page.dart';
+import 'help_center_page.dart'; // Import the Help Center page
+import 'privacy_policy_page.dart'; // Import the Privacy Policy page
+import 'terms_of_use_page.dart'; // Import the Terms of Use page
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -78,6 +82,30 @@ class ProfilePage extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => NotificationSettingsPage()),
           );
+        } else if (title == 'Appointment History') {
+          // Navigate to appointment history page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AppointmentHistoryPage()),
+          );
+        } else if (title == 'Help Center') {
+          // Navigate to help center page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HelpCenterPage()),
+          );
+        } else if (title == 'Privacy Policy') {
+          // Navigate to privacy policy page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => PrivacyPolicyPage()),
+          );
+        } else if (title == 'Terms of Use') {
+          // Navigate to terms of use page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TermsOfUsePage()),
+          );
         } else {
           // Navigate to respective page (other options)
         }
@@ -104,5 +132,4 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
 
