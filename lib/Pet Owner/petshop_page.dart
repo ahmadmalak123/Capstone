@@ -5,8 +5,15 @@ import 'services.dart';
 import 'Side_Pages/notifications_page.dart';
 import 'calendar.dart';
 
-class PetShopPage extends StatelessWidget {
+class PetShopPage extends StatefulWidget {
   const PetShopPage({Key? key}) : super(key: key);
+
+  @override
+  State<PetShopPage> createState() => _PetShopPageState();
+}
+
+class _PetShopPageState extends State<PetShopPage> {
+  int cartItemCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +24,35 @@ class PetShopPage extends StatelessWidget {
           title: Text('Pet Shop'), // Changed title to "Pet Shop"
           automaticallyImplyLeading: false,
           actions: [
-            IconButton(
-              onPressed: () {
-                // Navigate to notifications
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NotificationsPage()),
-                );
-              },
-              icon: Icon(Icons.notifications),
+            Stack(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    // Navigate to notifications
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NotificationsPage()),
+                    );
+                  },
+                  icon: Icon(Icons.notifications),
+                ),
+                if (cartItemCount > 0)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.red,
+                      radius: 10,
+                      child: Text(
+                        cartItemCount.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -64,8 +91,32 @@ class PetShopPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // View cart action
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CartPage()), // Navigate to CartPage
+          );
         },
-        child: Icon(Icons.shopping_cart),
+        child: Stack(
+          children: [
+            Icon(Icons.shopping_cart),
+            if (cartItemCount > 0)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: CircleAvatar(
+                  backgroundColor: Colors.red,
+                  radius: 10,
+                  child: Text(
+                    cartItemCount.toString(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
@@ -79,11 +130,11 @@ class PetShopPage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pets),
-            label: 'Pet Shop', // Changed label to "Pet Shop"
+            label: 'Pets',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
-            label: 'Pet Shop', // Changed label to "Pet Shop"
+            label: 'Pet Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
@@ -187,14 +238,6 @@ class PetShopPage extends StatelessWidget {
   }
 
   Widget _buildProductCard(String name, String description, double price) {
-    String imagePath = '';
-    if (name == 'Product 1') {
-      imagePath = 'assets/Untitled1.jpeg';
-    } else if (name == 'Product 2') {
-      imagePath = 'assets/Untitled2.jpeg';
-    } else if (name == 'Product 3') {
-      imagePath = 'assets/Untitled3.jpeg';
-    }
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -204,7 +247,7 @@ class PetShopPage extends StatelessWidget {
             child: Container(
               width: double.infinity,
               child: Image.asset(
-                imagePath,
+                'assets/Untitled1.jpeg',
                 fit: BoxFit.cover,
               ),
             ),
@@ -234,6 +277,10 @@ class PetShopPage extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         // Add to cart action
+                        setState(() {
+                          cartItemCount++;
+                        });
+                        print('Item $name added to cart');
                       },
                       child: Text('Add to Cart'),
                     ),
@@ -243,6 +290,53 @@ class PetShopPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CartPage extends StatelessWidget {
+  const CartPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Dummy data for cart items
+    List<String> cartItems = ['Product 1', 'Product 2', 'Product 3'];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Cart'),
+      ),
+      body: ListView.builder(
+        itemCount: cartItems.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(cartItems[index]),
+            trailing: IconButton(
+              icon: Icon(Icons.remove_shopping_cart),
+              onPressed: () {
+                // Remove item from cart
+                // Here, you can add logic to remove the item from the cart
+                // For simplicity, let's just print a message for now
+                print('Item ${cartItems[index]} removed from cart');
+              },
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ElevatedButton(
+            onPressed: () {
+              // Proceed to checkout action
+              // Here, you can add logic to proceed to checkout
+              // For simplicity, let's just print a message for now
+              print('Proceed to checkout');
+            },
+            child: Text('Proceed to Checkout'),
+          ),
+        ),
       ),
     );
   }

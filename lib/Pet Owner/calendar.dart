@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:petcare/Pet Owner/services.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'home_page.dart';
 import 'pets_page.dart';
 import 'petshop_page.dart';
@@ -21,39 +21,30 @@ class CalendarPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Upcoming Events',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Add list of upcoming events here
-                ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Upcoming Events',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: FloatingActionButton(
-              onPressed: () {
-                // Action to take when plus button is pressed
-                // Navigate to add reminder page or show add reminder dialog
-              },
-              child: Icon(Icons.add),
-            ),
-          ),
-        ],
+            SizedBox(height: 20),
+            // Add the table calendar here
+            CalendarWidget(),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Action to take when plus button is pressed
+          // Navigate to add reminder page or show add reminder dialog
+        },
+        child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
@@ -121,4 +112,56 @@ class CalendarPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class CalendarWidget extends StatefulWidget {
+  @override
+  _CalendarWidgetState createState() => _CalendarWidgetState();
+}
+
+class _CalendarWidgetState extends State<CalendarWidget> {
+  late final ValueNotifier<List<Event>> _selectedEvents;
+  late final Map<DateTime, List<Event>> _events;
+  late final CalendarFormat _calendarFormat;
+  late final DateTime _focusedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedEvents = ValueNotifier([]);
+    _events = {};
+    _calendarFormat = CalendarFormat.month;
+    _focusedDay = DateTime.now();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TableCalendar(
+      firstDay: DateTime.utc(2020, 1, 1),
+      lastDay: DateTime.utc(2030, 12, 31),
+      focusedDay: _focusedDay,
+      calendarFormat: _calendarFormat,
+      startingDayOfWeek: StartingDayOfWeek.sunday,
+      onFormatChanged: (format) {
+        setState(() {
+          _calendarFormat = format;
+        });
+      },
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          _focusedDay = focusedDay;
+          _selectedEvents.value = _events[selectedDay] ?? [];
+        });
+      },
+      eventLoader: (day) {
+        return _events[day] ?? [];
+      },
+    );
+  }
+}
+
+class Event {
+  final String title;
+
+  Event(this.title);
 }

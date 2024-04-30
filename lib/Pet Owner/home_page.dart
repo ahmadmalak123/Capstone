@@ -87,10 +87,34 @@ class HomePage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildMenuButton('Request Appointment'),
-                        _buildMenuButton('Contact Provider'),
-                        _buildMenuButton('Create To Do'),
-                        _buildMenuButton('Review Pet Info'),
+                        _buildMenuButton('Request Appointment', () {
+                          // Navigate to appointments page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ServicesPage()),
+                          );
+                        }),
+                        _buildMenuButton('Purchase Products', () {
+                          // Navigate to pet shop page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PetShopPage()),
+                          );
+                        }),
+                        _buildMenuButton('Create To Do', () {
+                          // Navigate to calendar page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CalendarPage()),
+                          );
+                        }),
+                        _buildMenuButton('Review Pet Info', () {
+                          // Navigate to pets page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PetsPage()),
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -104,9 +128,9 @@ class HomePage extends StatelessWidget {
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
-                  _buildPetFactCard('Fact 1', 'assets/Untitled1.jpeg'),
-                  _buildPetFactCard('Fact 2', 'assets/Untitled2.jpeg'),
-                  _buildPetFactCard('Fact 3', 'assets/Untitled.jpeg'),
+                  _buildPetFactCard('Fact 1', 'Description of Fact 1', 'assets/Untitled1.jpeg', 'https://www.example.com/fact1'),
+                  _buildPetFactCard('Fact 2', 'Description of Fact 2', 'assets/Untitled2.jpeg', 'https://www.example.com/fact2'),
+                  _buildPetFactCard('Fact 3', 'Description of Fact 3', 'assets/Untitled.jpeg', 'https://www.example.com/fact3'),
                   // Add more pet fact cards as needed
                 ],
               ),
@@ -185,11 +209,9 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuButton(String title) {
+  Widget _buildMenuButton(String title, VoidCallback onPressed) {
     return ElevatedButton(
-      onPressed: () {
-        // Implement button functionality
-      },
+      onPressed: onPressed,
       child: Text(
         title,
         style: TextStyle(fontSize: 16),
@@ -197,10 +219,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPetFactCard(String title, String imagePath) {
+  Widget _buildPetFactCard(String title, String description, String imagePath, String sourceUrl) {
     return Card(
       margin: EdgeInsets.all(10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Image.asset(
             imagePath,
@@ -210,9 +233,34 @@ class HomePage extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(10),
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  description,
+                  style: TextStyle(fontSize: 14),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Read more on:',
+                  style: TextStyle(fontSize: 14),
+                ),
+                SizedBox(height: 5),
+                GestureDetector(
+                  onTap: () {
+                    // Open the source URL
+                  },
+                  child: Text(
+                    sourceUrl,
+                    style: TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

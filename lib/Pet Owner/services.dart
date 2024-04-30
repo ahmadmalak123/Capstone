@@ -105,11 +105,11 @@ class _ServicesPageState extends State<ServicesPage> {
               ),
             ),
             SizedBox(height: 10),
-            _buildServiceCard('Medication Refill', Icons.medication),
-            _buildServiceCard('Checkup', Icons.medical_services),
-            _buildServiceCard('Trim', Icons.cut),
-            _buildServiceCard('Vaccination', Icons.local_hospital),
-            _buildServiceCard('Surgery', Icons.masks),
+            _buildServiceCard(context, 'Medication Refill', Icons.medication),
+            _buildServiceCard(context, 'Checkup', Icons.medical_services),
+            _buildServiceCard(context, 'Trim', Icons.cut),
+            _buildServiceCard(context, 'Vaccination', Icons.local_hospital),
+            _buildServiceCard(context, 'Surgery', Icons.masks),
             // Add more service cards as needed
           ],
         ),
@@ -173,14 +173,18 @@ class _ServicesPageState extends State<ServicesPage> {
     );
   }
 
-  Widget _buildServiceCard(String serviceName, IconData icon) {
+  Widget _buildServiceCard(BuildContext context, String serviceName, IconData icon) {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: ListTile(
         leading: Icon(icon),
         title: Text(serviceName),
         onTap: () {
-          // Action to take when service is tapped
+          // Navigate to appointment booking page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AppointmentBookingPage(serviceName: serviceName)),
+          );
         },
       ),
     );
@@ -252,6 +256,78 @@ class _ServicesPageState extends State<ServicesPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AppointmentBookingPage extends StatelessWidget {
+  final String serviceName;
+
+  const AppointmentBookingPage({Key? key, required this.serviceName}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Book Appointment'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Service: $serviceName',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Select Date:',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                // Action to select date
+              },
+              child: Text('Select Date'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Select Vet:',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            // Add dropdown or other input for vet selection
+            ElevatedButton(
+              onPressed: () {
+                // Action to select vet
+              },
+              child: Text('Select Vet'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Comments:',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Enter comments (optional)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Action to confirm appointment booking
+              },
+              child: Text('Request Appointment'),
+            ),
+          ],
+        ),
       ),
     );
   }
