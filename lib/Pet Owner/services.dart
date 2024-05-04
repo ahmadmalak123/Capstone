@@ -5,6 +5,7 @@ import 'pets_page.dart';
 import 'petshop_page.dart';
 import 'Side_Pages/notifications_page.dart';
 import 'calendar.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ServicesPage extends StatefulWidget {
   @override
@@ -37,8 +38,6 @@ class _ServicesPageState extends State<ServicesPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
-
-    // Start auto-scrolling
     _startAutoScroll();
   }
 
@@ -73,7 +72,6 @@ class _ServicesPageState extends State<ServicesPage> {
           IconButton(
             icon: Icon(Icons.notifications),
             onPressed: () {
-              // Navigate to notifications or perform notification-related action
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => NotificationsPage()),
@@ -110,7 +108,18 @@ class _ServicesPageState extends State<ServicesPage> {
             _buildServiceCard(context, 'Trim', Icons.cut),
             _buildServiceCard(context, 'Vaccination', Icons.local_hospital),
             _buildServiceCard(context, 'Surgery', Icons.masks),
-            // Add more service cards as needed
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RateVetPage()),
+                  );
+                },
+                child: Text('Rate Vet'),
+              ),
+            ),
           ],
         ),
       ),
@@ -130,7 +139,7 @@ class _ServicesPageState extends State<ServicesPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
-            label: 'Services',
+            label: 'Pet Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment),
@@ -155,19 +164,24 @@ class _ServicesPageState extends State<ServicesPage> {
               MaterialPageRoute(builder: (context) => PetsPage()),
             );
           } else if (index == 2) {
-            // Navigate to pet shop page
+            // Navigate to pets page
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => PetShopPage()),
             );
+          } else if (index == 3) {
+            // Navigate to pets page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ServicesPage()),
+            );
           } else if (index == 4) {
-            // Navigate to calendar page
+            // Navigate to pets page
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => CalendarPage()),
             );
           }
-          // Add navigation to other pages if needed
         },
       ),
     );
@@ -180,7 +194,6 @@ class _ServicesPageState extends State<ServicesPage> {
         leading: Icon(icon),
         title: Text(serviceName),
         onTap: () {
-          // Navigate to appointment booking page
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AppointmentBookingPage(serviceName: serviceName)),
@@ -207,8 +220,7 @@ class _ServicesPageState extends State<ServicesPage> {
     );
   }
 
-  Widget _buildPhotoWithInformation(String title, String description,
-      String imagePath) {
+  Widget _buildPhotoWithInformation(String title, String description, String imagePath) {
     return Container(
       margin: EdgeInsets.all(10),
       child: Stack(
@@ -234,24 +246,11 @@ class _ServicesPageState extends State<ServicesPage> {
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
-                color: Colors.black.withOpacity(
-                    0.2), // Grey transparent background
+                color: Colors.black.withOpacity(0.5), // Slightly darker for better text visibility
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    description,
-                    style: TextStyle(fontSize: 14, color: Colors.white),
-                  ),
-                ],
+              child: Text(
+                title + "\n" + description,
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ),
@@ -325,6 +324,91 @@ class AppointmentBookingPage extends StatelessWidget {
                 // Action to confirm appointment booking
               },
               child: Text('Request Appointment'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+class RateVetPage extends StatefulWidget {
+  @override
+  _RateVetPageState createState() => _RateVetPageState();
+}
+
+class _RateVetPageState extends State<RateVetPage> {
+  final List<String> vets = ['Dr. Smith', 'Dr. Johnson', 'Dr. Emily'];  // Example vets
+  String? selectedVet;
+  double _currentRating = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Rate a Vet'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Select a Vet:', style: TextStyle(fontSize: 20)),
+            DropdownButton<String>(
+              value: selectedVet,
+              icon: const Icon(Icons.arrow_downward),
+              elevation: 16,
+              style: const TextStyle(color: Colors.deepPurple),
+              underline: Container(
+                height: 2,
+                color: Colors.deepPurpleAccent,
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedVet = newValue!;
+                });
+              },
+              items: vets.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            Text('Rate the Vet:', style: TextStyle(fontSize: 20)),
+            RatingBar.builder(
+              initialRating: _currentRating,
+              minRating: 1,
+              direction: Axis.horizontal,
+              allowHalfRating: true,
+              itemCount: 5,
+              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+              itemBuilder: (context, _) => Icon(Icons.star, color: Colors.amber),
+              onRatingUpdate: (rating) {
+                setState(() {
+                  _currentRating = rating;
+                });
+              },
+            ),
+            SizedBox(height: 20),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Enter your review here',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 5,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Submit the review to the backend
+                // Here you should implement your backend logic
+                // e.g., POST request to your API
+                print('Review submitted for $selectedVet with rating $_currentRating');
+                // Place for backend integration comment
+                // "Insert your backend function here to handle the review submission"
+              },
+              child: Text('Submit Review'),
             ),
           ],
         ),

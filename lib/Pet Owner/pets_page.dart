@@ -89,7 +89,7 @@ class PetsPage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
-            label: '',
+            label: 'Calendar',
           ),
         ],
         onTap: (index) {

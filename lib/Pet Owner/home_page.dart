@@ -162,7 +162,7 @@ class HomePage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
-            label: 'Appointments',
+            label: 'Calendar',
           ),
         ],
         onTap: (index) {
