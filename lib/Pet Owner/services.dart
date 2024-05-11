@@ -93,10 +93,10 @@ class _ServicesPageState extends State<ServicesPage> {
             ),
             SizedBox(height: 10),
             _buildServiceCard(context, 'Medication Refill', Icons.medication),
-            _buildServiceCard(context, 'Checkup', Icons.medical_services),
-            _buildServiceCard(context, 'Trim', Icons.cut),
-            _buildServiceCard(context, 'Vaccination', Icons.local_hospital),
-            _buildServiceCard(context, 'Surgery', Icons.masks),
+            _buildServiceCard(context, 'Routine Check-ups', Icons.medical_services),
+            _buildServiceCard(context, 'Grooming Services', Icons.cut),
+            _buildServiceCard(context, 'Diagnostic Testing', Icons.local_hospital),
+            _buildServiceCard(context, 'Dental Care', Icons.masks),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
