@@ -454,8 +454,32 @@ class ApiHandler {
     }
   }
 
+  Future<bool> createVaccination(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/Vaccination'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data),
+    );
+    return response.statusCode == 201;
+  }
+
+  // Update an existing vaccination record
+  Future<bool> updateVaccination(int vaccinationId, Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/Vaccination/$vaccinationId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data),
+    );
+    return response.statusCode == 200;
+  }
+
+  // Delete a vaccination record
+  Future<bool> deleteVaccination(int vaccinationId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/Vaccination/$vaccinationId'),
+    );
+    return response.statusCode == 204;
+  }
+
 }
-
-
-
 
