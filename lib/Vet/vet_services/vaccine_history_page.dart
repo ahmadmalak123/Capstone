@@ -82,11 +82,117 @@ class PetVaccinationDetailsPage extends StatefulWidget {
 
 class _PetVaccinationDetailsPageState extends State<PetVaccinationDetailsPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  Future<List<VaccineRecord>>? _vaccineRecordsFuture;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _reloadVaccinations();
+  }
+
+  void _reloadVaccinations() {
+    setState(() {
+      _vaccineRecordsFuture =
+          ApiHandler().getAllVaccinationByPetId(widget.pet.id);
+    });
+  }
+
+  Widget _vaccineStatusView(String status) {
+    return FutureBuilder<List<VaccineRecord>>(
+      future: _vaccineRecordsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+              child: Text("Failed to load vaccinations: ${snapshot.error}"));
+        } else if (snapshot.hasData) {
+          List<VaccineRecord> filteredRecords = snapshot.data!.where((
+              record) => record.status == status).toList();
+
+          if (filteredRecords.isEmpty) {
+            return Center(child: Text("No records for $status vaccinations"));
+          }
+
+          return ListView.builder(
+            itemCount: filteredRecords.length,
+            itemBuilder: (context, index) {
+              final VaccineRecord record = filteredRecords[index]; // Here is the definition of record
+
+              return Card(
+                margin: const EdgeInsets.all(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        record.vaccineName ?? "Unknown Vaccine",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        record.notes ?? "No additional notes",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Administered On: ${record.dateAdministered?.toString()
+                            .split(' ')[0] ?? 'Unknown'}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        "Next Due Date: ${record.nextDueDate?.toString().split(
+                            ' ')[0] ?? 'Not Available'}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              bool updated = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UpdateVaccinationPage(
+                                      vaccineRecord: record),
+                                ),
+                              ) ?? false;
+                              if (updated) {
+                                _reloadVaccinations(); // Call the reload method
+                              }
+                            },
+                            child: Text('Update'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        } else {
+          return Center(child: Text("No vaccination records found"));
+        }
+      },
+    );
   }
 
   @override
@@ -118,9 +224,9 @@ class _PetVaccinationDetailsPageState extends State<PetVaccinationDetailsPage> w
             MaterialPageRoute(
               builder: (context) => CreateVaccinationPage(petId: widget.pet.id),
             ),
-          );
+          ) ?? false;
           if (updated) {
-            setState(() {});
+            _reloadVaccinations(); // Refresh the list if a new vaccine record is created
           }
         },
         child: Icon(Icons.add),
@@ -128,105 +234,7 @@ class _PetVaccinationDetailsPageState extends State<PetVaccinationDetailsPage> w
       ),
     );
   }
-
-  Widget _vaccineStatusView(String status) {
-    return FutureBuilder<List<VaccineRecord>>(
-      future: ApiHandler().getAllVaccinationByPetId(widget.pet.id),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text("Failed to load vaccinations: ${snapshot.error}"));
-        } else if (snapshot.hasData) {
-          List<VaccineRecord> filteredRecords = snapshot.data!.where((record) => record.status == status).toList();
-
-          if (filteredRecords.isEmpty) {
-            return Center(child: Text("No records for $status vaccinations"));
-          }
-
-          return ListView.builder(
-            itemCount: filteredRecords.length,
-            itemBuilder: (context, index) {
-              final record = filteredRecords[index];
-              return Card(
-                margin: const EdgeInsets.all(8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        record.vaccineName ?? "Unknown Vaccine",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        record.notes ?? "No additional notes",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Administered On: ${record.dateAdministered?.toString().split(' ')[0] ?? 'Unknown'}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        "Next Due Date: ${record.nextDueDate?.toString().split(' ')[0] ?? 'Not Available'}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.red,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        "Status: ${record.status ?? 'Unknown'}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              bool updated = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => UpdateVaccinationPage(vaccineRecord: record),
-                                ),
-                              );
-                              if (updated) {
-                                setState(() {});
-                              }
-                            },
-                            child: Text('Update'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        } else {
-          return Center(child: Text("No vaccination records found"));
-        }
-      },
-    );
-  }
 }
-
 
 class CreateVaccinationPage extends StatefulWidget {
   final int petId;
@@ -335,7 +343,6 @@ class _CreateVaccinationPageState extends State<CreateVaccinationPage> {
   }
 }
 
-
 class UpdateVaccinationPage extends StatefulWidget {
   final VaccineRecord vaccineRecord;
   UpdateVaccinationPage({required this.vaccineRecord});
@@ -365,6 +372,8 @@ class _UpdateVaccinationPageState extends State<UpdateVaccinationPage> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final data = {
+        'vaccinationId': widget.vaccineRecord.vaccinationId,
+        'petId': widget.vaccineRecord.petId,
         'vaccineName': _vaccineNameController.text,
         'notes': _notesController.text,
         'dateAdministered': _dateAdministered?.toIso8601String(),
@@ -375,7 +384,7 @@ class _UpdateVaccinationPageState extends State<UpdateVaccinationPage> {
       bool success = await ApiHandler().updateVaccination(widget.vaccineRecord.vaccinationId, data);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vaccination record updated')));
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Pop with 'true' to indicate success
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update record')));
       }
@@ -386,7 +395,7 @@ class _UpdateVaccinationPageState extends State<UpdateVaccinationPage> {
     bool success = await ApiHandler().deleteVaccination(widget.vaccineRecord.vaccinationId);
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vaccination record deleted')));
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Pop with 'true' to indicate success
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete record')));
     }
@@ -455,6 +464,9 @@ class _UpdateVaccinationPageState extends State<UpdateVaccinationPage> {
             ElevatedButton(
               onPressed: _submitForm,
               child: Text('Update'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
             ),
           ],
         ),

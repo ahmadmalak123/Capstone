@@ -470,7 +470,7 @@ class ApiHandler {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(data),
     );
-    return response.statusCode == 200;
+    return response.statusCode >= 200 && response.statusCode <210;
   }
 
   // Delete a vaccination record
