@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:petcare/models/for_vet/review.dart';
 import 'models/Equipment.dart';
 import 'models/PetOwner.dart';
+import 'models/for_vet/MedicalRecord.dart';
 import 'models/for_vet/appointment.dart';
 import 'models/for_vet/pet.dart';
 import 'models/for_vet/vaccine.dart';
@@ -480,6 +481,49 @@ class ApiHandler {
     );
     return response.statusCode == 204;
   }
+
+  // Create a new medical record
+  Future<bool> createMedicalRecord(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/MedicalRecord'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data),
+    );
+    return response.statusCode == 201;
+  }
+
+  // Update an existing medical record
+  Future<bool> updateMedicalRecord(int recordId, Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/MedicalRecord/$recordId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(data),
+    );
+    return response.statusCode >= 200 && response.statusCode <210;
+  }
+
+  // Delete a medical record
+  Future<bool> deleteMedicalRecord(int recordId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/MedicalRecord/$recordId'),
+    );
+    return response.statusCode == 204;
+  }
+
+  // Retrieve all medical records for a specific pet
+  Future<List<MedicalRecord>> getAllMedicalRecordsByPetId(int petId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/MedicalRecord/$petId'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> recordJson = jsonDecode(response.body);
+      return recordJson.map((json) => MedicalRecord.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load medical records');
+    }
+  }
+
 
 }
 
