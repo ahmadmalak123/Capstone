@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
-import 'Pet Owner/home_page.dart'; // Import the home page
+import 'Admin/home.dart';
+import 'ApiHandler.dart';
+import 'Pet Owner/pet_home_page.dart';
+import 'Vet/home_page.dart'; // Import the home page
+import 'package:intl/intl.dart'; // Add this line at the top for date formatting
+
+import 'package:provider/provider.dart';
+import 'IdProvider.dart';
 
 class LoginPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final ApiHandler apiHandler = ApiHandler();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,13 +23,18 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Image.asset('assets/Logo.jpeg', height: 120), // Add your logo image at the top of the login page
+              SizedBox(height: 30), // Space between the logo and the login title
+
               Text(
+
                 'Login',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
@@ -26,6 +42,7 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: 20),
               TextField(
+                controller: passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
@@ -34,13 +51,91 @@ class LoginPage extends StatelessWidget {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Perform login validation
-                  // For demo purposes, navigate to the home page
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
+                onPressed: () async {
+                  // Check for empty fields first
+                  if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Error"),
+                        content: Text("Email and password cannot be empty."),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                    return; // Stop further execution
+                  }
+
+                  try {
+                    List<String>? loginResult = await apiHandler.login(emailController.text, passwordController.text);
+
+                    if (loginResult != null && loginResult.length == 2) {
+                      // Assuming role-based navigation, adapt as necessary
+                      String role = loginResult[0];
+                      int id = int.parse(loginResult[1]);
+
+                      // Set the user ID in the IdProvider
+                      Provider.of<IdProvider>(context, listen: false).setId(id);
+
+                      if (role == 'PetOwner') {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                        );
+                      } else if (role == 'Admin') {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => ManageSystemScreen()),
+                        );
+                      }
+                      else if (role == 'Veterinarian') {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyApp()),
+                        );
+                      }
+                    } else {
+                      // Login failed due to incorrect credentials
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text("Login Failed"),
+                          content: Text("Incorrect email or password."),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                              },
+                              child: Text("Try Again"),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    // Handle error case
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Error"),
+                        content: Text("An error occurred: $e"),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                 },
                 child: Text('Login'),
               ),
@@ -55,7 +150,7 @@ class LoginPage extends StatelessWidget {
                 },
                 child: Text('Create an Account'),
               ),
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom), // Adjust for keyboard
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
             ],
           ),
         ),
@@ -64,7 +159,22 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
+  @override
+  _SignupPageState createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  DateTime? dateOfBirth;
+  String? gender = 'Male'; // Default gender
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,78 +185,179 @@ class SignupPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Sign Up',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+              Text('Sign Up', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              SizedBox(height: 20),
+              TextField(
+                controller: firstNameController,
+                decoration: InputDecoration(labelText: 'First Name', border: OutlineInputBorder()),
               ),
               SizedBox(height: 20),
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'First Name',
-                  border: OutlineInputBorder(),
-                ),
+                controller: lastNameController,
+                decoration: InputDecoration(labelText: 'Last Name', border: OutlineInputBorder()),
               ),
               SizedBox(height: 20),
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'Last Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                 keyboardType: TextInputType.emailAddress,
-                // Mark email field as required
-                //validator: (value) => value.isEmpty ? 'Email is required' : null,
               ),
               SizedBox(height: 20),
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
+                controller: usernameController,
+                decoration: InputDecoration(labelText: 'Username', border: OutlineInputBorder()),
               ),
               SizedBox(height: 20),
               TextField(
-                decoration: InputDecoration(
-                  labelText: 'Date of Birth',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.datetime,
-                // You can use a date picker widget for date selection
-              ),
-              SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Gender',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
+                controller: passwordController,
+                decoration: InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
                 obscureText: true,
-                // Mark password field as required
-                //validator: (value) => value.isEmpty ? 'Password is required' : null,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: confirmPasswordController,
+                decoration: InputDecoration(labelText: 'Confirm Password', border: OutlineInputBorder()),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: addressController,
+                decoration: InputDecoration(labelText: 'Address', border: OutlineInputBorder()),
+              ),
+              SizedBox(height: 20),
+              GestureDetector(
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: dateOfBirth ?? DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null && picked != dateOfBirth) {
+                    setState(() {
+                      dateOfBirth = picked;
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: dateOfBirth == null ? 'Date of Birth' : DateFormat('yyyy-MM-dd').format(dateOfBirth!),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Column(
+                children: <Widget>[
+                  RadioListTile<String>(
+                    title: const Text('Male'),
+                    value: 'Male',
+                    groupValue: gender,
+                    onChanged: (value) {
+                      setState(() {
+                        gender = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Female'),
+                    value: 'Female',
+                    groupValue: gender,
+                    onChanged: (value) {
+                      setState(() {
+                        gender = value;
+                      });
+                    },
+                  ),
+                ],
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Perform signup validation
-                  // For demo purposes, navigate to the home page after signup
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
+                onPressed: () async {
+                  if (passwordController.text != confirmPasswordController.text) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Error"),
+                        content: Text("Passwords do not match."),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (firstNameController.text.isEmpty || lastNameController.text.isEmpty || emailController.text.isEmpty ||
+                      usernameController.text.isEmpty || passwordController.text.isEmpty || addressController.text.isEmpty ||
+                      dateOfBirth == null || gender == null) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Error"),
+                        content: Text("All fields must be filled."),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Define petOwnerData using the input values
+                  Map<String, dynamic> petOwnerData = {
+                    'ownerId': 0,     // Assuming ownerId is auto-generated and you must send a default value like 0
+                    'userId': 0,      // Similarly for userId, send a default or expected value
+                    'address': addressController.text,
+                    'username': usernameController.text,
+                    'password': passwordController.text,
+                    'email': emailController.text,
+                    'fn': firstNameController.text,
+                    'ln': lastNameController.text,
+                    'dob': DateFormat('yyyy-MM-dd').format(dateOfBirth!), // Ensure date is formatted correctly
+                    'gender': gender,
+                    'role': 'PetOwner'  // Assuming 'role' is set to 'PetOwner' as default or based on some condition
+                  };
+
+
+                  bool success = await ApiHandler().createPetOwner(petOwnerData);
+                  if (success) {
+                    // Navigate to home page or show a success message
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),  // Adjust as necessary
+                    );
+                  } else {
+                    // Show error dialog
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text("Signup Failed"),
+                        content: Text("Unable to create account, please try again."),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                            },
+                            child: Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                 },
                 child: Text('Sign Up'),
               ),

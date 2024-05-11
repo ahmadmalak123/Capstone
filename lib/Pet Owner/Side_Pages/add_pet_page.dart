@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class AddPetPage extends StatefulWidget {
   const AddPetPage({Key? key}) : super(key: key);
@@ -8,11 +10,23 @@ class AddPetPage extends StatefulWidget {
 }
 
 class _AddPetPageState extends State<AddPetPage> {
+  final ImagePicker _picker = ImagePicker();
+  File? _imageFile;
+
   String _petName = '';
   String _species = '';
   String _gender = '';
   String _dateOfBirth = '';
   String _breed = '';
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,64 +39,42 @@ class _AddPetPageState extends State<AddPetPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Pet Picture
             Center(
-              child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey[300],
-                ),
-                child: Center(
-                  child: IconButton(
-                    icon: Icon(Icons.photo_camera),
-                    onPressed: () {
-                      // Add action to add pet picture
-                    },
+              child: GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey[300],
+                    image: _imageFile == null ? null : DecorationImage(
+                      image: FileImage(_imageFile!),
+                      fit: BoxFit.cover,
+                    ),
                   ),
+                  child: _imageFile == null ? Icon(Icons.photo_camera, size: 50) : null,
                 ),
               ),
             ),
             SizedBox(height: 20),
-            // Pet Details Form
             Text(
               'Add Pet Details',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            _buildPetDetailFormField('Name', (value) {
-              setState(() {
-                _petName = value;
-              });
-            }),
-            _buildPetDetailFormField('Species', (value) {
-              setState(() {
-                _species = value;
-              });
-            }),
-            _buildPetDetailFormField('Gender', (value) {
-              setState(() {
-                _gender = value;
-              });
-            }),
-            _buildPetDetailFormField('Date of Birth', (value) {
-              setState(() {
-                _dateOfBirth = value;
-              });
-            }),
-            _buildPetDetailFormField('Breed', (value) {
-              setState(() {
-                _breed = value;
-              });
-            }),
+            _buildPetDetailFormField('Name', (value) => _petName = value),
+            _buildPetDetailFormField('Species', (value) => _species = value),
+            _buildPetDetailFormField('Gender', (value) => _gender = value),
+            _buildPetDetailFormField('Date of Birth', (value) => _dateOfBirth = value),
+            _buildPetDetailFormField('Breed', (value) => _breed = value),
             SizedBox(height: 20),
-            // Save Button
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Save new pet details
-                  // You can implement the logic here to save the pet details to your database or perform any other action.
+                  // Placeholder: Here you would typically make an API call to your backend to save the pet details.
+                  // Example:
+                  // uploadPetDetails(_petName, _species, _gender, _dateOfBirth, _breed, _imageFile);
                 },
                 child: Text('Add pet'),
               ),
@@ -97,6 +89,7 @@ class _AddPetPageState extends State<AddPetPage> {
     return TextFormField(
       decoration: InputDecoration(
         labelText: label,
+        border: OutlineInputBorder(),  // Add borders to text fields
       ),
       onChanged: onChanged,
     );

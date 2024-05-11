@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'pet_home_page.dart';
 import 'pets_page.dart';
 import 'petshop_page.dart';
 import 'Side_Pages/notifications_page.dart';
@@ -68,17 +68,6 @@ class _ServicesPageState extends State<ServicesPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('Services'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationsPage()),
-              );
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -122,67 +111,6 @@ class _ServicesPageState extends State<ServicesPage> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 3,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets),
-            label: 'Pets',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Pet Shop',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Calendar',
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            // Navigate to home page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          } else if (index == 1) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PetsPage()),
-            );
-          } else if (index == 2) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PetShopPage()),
-            );
-          } else if (index == 3) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ServicesPage()),
-            );
-          } else if (index == 4) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CalendarPage()),
-            );
-          }
-        },
       ),
     );
   }

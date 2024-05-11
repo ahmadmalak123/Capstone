@@ -3,7 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'services.dart';
 import 'petshop_page.dart';
 import 'pets_page.dart';
-import 'home_page.dart';
+import 'pet_home_page.dart';
 import 'Side_Pages/notifications_page.dart';
 
 // Define the Event class to hold event data
@@ -225,18 +225,6 @@ class CalendarPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Calendar'),
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              // Navigate to notifications page
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationsPage()),
-              );
-            },
-          ),
-        ],
       ),
       body: CalendarWidget(events: events),
       floatingActionButton: FloatingActionButton(
@@ -249,70 +237,6 @@ class CalendarPage extends StatelessWidget {
           );
         },
         child: Icon(Icons.add),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 4,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets),
-            label: 'Pets',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Pet Shop',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Calendar',
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            // Navigate to home page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
-          } else if (index == 1) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PetsPage()),
-            );
-          } else if (index == 2) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PetShopPage()),
-            );
-          }
-          else if (index == 3) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ServicesPage()),
-            );
-          }
-          else if (index == 4) {
-            // Navigate to pets page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CalendarPage()),
-            );
-          }
-          // Add navigation to other pages if needed
-        },
       ),
     );
   }
