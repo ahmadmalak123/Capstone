@@ -88,7 +88,7 @@ class HomeScreen extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: 'Welcome to the Home of ',
+                    text: 'Welcome to the ',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: 'Pet-Owners!',
+                    text: 'Home of Pets!',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
