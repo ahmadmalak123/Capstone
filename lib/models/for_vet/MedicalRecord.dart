@@ -21,17 +21,6 @@ class MedicalRecord {
   // From JSON (deserialization)
   factory MedicalRecord.fromJson(Map<String, dynamic> json) {
     return MedicalRecord(
-
-      recordId: json['RecordId'] ?? 0,
-      petId: json['PetId'],
-      description: json['Description'],
-      service: json['Service'],
-      testResults: json['TestResults'] != null
-          ? List<int>.from(json['TestResults'])
-          : null,
-      date: json['Date'] != null ? DateTime.parse(json['Date']) : null,
-      status: json['Status'],
-
       recordId: json['recordId'] ?? 0,
       petId: json['petId'],
       description: json['description'],
@@ -48,17 +37,6 @@ class MedicalRecord {
   // To JSON (serialization)
   Map<String, dynamic> toJson() {
     return {
-
-      'RecordId': recordId,
-      'PetId': petId,
-      'Description': description,
-      'Service': service,
-      'TestResults': testResults,
-      'Date': date?.toIso8601String(),
-      'Status': status,
-    };
-  }
-}
 
       'recordId': recordId,
       'petId': petId,
