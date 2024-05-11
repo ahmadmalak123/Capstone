@@ -79,11 +79,14 @@ flutter:
     - assets/cat_sleepy.jpg
     - assets/dog_dreaming.jpg
     - assets/hamster.jpg
-    - assets/Luna.jpeg
-    - assets/Milo.jpg
+    - assets/luna_OG.jpeg
+    - assets/milo_OG.jpg
     - assets/Logo.jpeg
     - assets/default_avatar.png
-
+    - assets/PetCare_transparent.png
+    - assets/dog_bone.jpg
+    - assets/fish_food.jpg
+    - assets/cat_toys.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

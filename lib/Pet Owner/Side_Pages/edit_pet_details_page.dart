@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import '../../models/for_pet_owner/pet.dart';
 
@@ -18,7 +19,7 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
   late TextEditingController _speciesController;
   late TextEditingController _breedController;
   late TextEditingController _dobController;
-  File? _image;
+  Uint8List? _imageData;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -29,7 +30,8 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
     _genderController = TextEditingController(text: widget.pet.gender);
     _speciesController = TextEditingController(text: widget.pet.species);
     _breedController = TextEditingController(text: widget.pet.breed);
-    _dobController = TextEditingController(text: widget.pet.dob);
+    _dobController = TextEditingController(text: widget.pet.dob?.toIso8601String().split('T').first);
+    _imageData = widget.pet.image;
   }
 
   @override
@@ -51,7 +53,7 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _imageData = File(pickedFile.path).readAsBytesSync();
       });
     }
   }
@@ -71,10 +73,14 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
                 onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundImage: _image != null ? FileImage(_image!) as ImageProvider : AssetImage(widget.pet.image ?? 'assets/default_image.png'),
-                  child: Icon(Icons.camera_alt, color: Colors.white70),
+                  backgroundColor: Colors.grey[200], // Default background color
+                  backgroundImage: _imageData != null
+                      ? MemoryImage(_imageData!) as ImageProvider<Object>
+                      : AssetImage('assets/default_image.png') as ImageProvider<Object>,
+                  child: _imageData == null ? Icon(Icons.camera_alt, color: Colors.white70, size: 30) : null,
                 ),
               ),
+              SizedBox(height: 20),
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Name'),
@@ -94,7 +100,20 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
               TextField(
                 controller: _dobController,
                 decoration: InputDecoration(labelText: 'Date of Birth'),
+                onTap: () async {
+                  FocusScope.of(context).requestFocus(FocusNode()); // to prevent opening default keyboard
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: widget.pet.dob ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    _dobController.text = pickedDate.toIso8601String().split('T').first; // Update text field
+                  }
+                },
               ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _updatePetDetails,
                 child: Text('Save Changes'),

@@ -23,11 +23,14 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Image.asset('assets/Logo.jpeg', height: 120), // Add your logo image at the top of the login page
-              SizedBox(height: 30), // Space between the logo and the login title
+              Image.asset(
+                'assets/PetCare_transparent.png',
+                width: 300, // Adjusted image size
+                height: 300,
+              ),// Add your logo image at the top of the login page
+              SizedBox(height: 10), // Space between the logo and the login title
 
               Text(
-
                 'Login',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
@@ -142,6 +145,12 @@ class LoginPage extends StatelessWidget {
               SizedBox(height: 20),
               TextButton(
                 onPressed: () {
+                  // Add functionality for password recovery
+                },
+                child: Text('Forgot password?'),
+              ),
+              TextButton(
+                onPressed: () {
                   // Navigate to the signup page
                   Navigator.push(
                     context,
@@ -178,9 +187,15 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,

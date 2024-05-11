@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/for_pet_owner/pet.dart';
 import 'edit_pet_details_page.dart';
+import 'dart:typed_data';
+import '../../models/for_vet/MedicalRecord.dart';
 
 class PetDetailsPage extends StatelessWidget {
   final Pet pet;
@@ -30,28 +32,30 @@ class PetDetailsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              height: 200,  // Fixed height for image container
+              height: 200, // Fixed height for the image container
               width: double.infinity,
               decoration: BoxDecoration(
-                  color: Colors.grey[200],  // Light grey color if image fails to load
-                  borderRadius: BorderRadius.circular(8),  // Rounded corners for the container
-                  image: DecorationImage(
-                      image: AssetImage(pet.image),
-                      fit: BoxFit.cover,
-                      onError: (exception, stackTrace) {
-                        // Image loading error handling is silent
-                      }
-                  )
+                color: Colors.grey[200], // Light grey color if image fails to load
+                borderRadius: BorderRadius.circular(8), // Rounded corners for the container
+                image: pet.image != null
+                    ? DecorationImage(
+                    image: MemoryImage(pet.image!),
+                    fit: BoxFit.cover,
+                    onError: (exception, stackTrace) {
+                      // Image loading error handling is silent
+                    }
+                )
+                    : null,
               ),
-              child: pet.image == null || pet.image.isEmpty ? Center(child: Icon(Icons.pets, size: 80, color: Colors.grey[500])) : null,
+              child: pet.image == null ? Center(child: Icon(Icons.pets, size: 80, color: Colors.grey[500])) : null,
             ),
             SizedBox(height: 20),
             Text('Name: ${pet.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            _buildDetailRow(Icons.transgender, 'Gender: ${pet.gender}'),
-            _buildDetailRow(Icons.category, 'Species: ${pet.species}'),
-            _buildDetailRow(Icons.pets, 'Breed: ${pet.breed}'),
-            _buildDetailRow(Icons.cake, 'DOB: ${pet.dob}'),
+            _buildDetailRow(Icons.transgender, 'Gender: ${pet.gender ?? "Unknown"}'),
+            _buildDetailRow(Icons.category, 'Species: ${pet.species ?? "Unknown"}'),
+            _buildDetailRow(Icons.pets, 'Breed: ${pet.breed ?? "Unknown"}'),
+            _buildDetailRow(Icons.cake, 'DOB: ${pet.dob?.toIso8601String().split('T').first ?? "Unknown"}'),
           ],
         ),
       ),

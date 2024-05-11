@@ -21,7 +21,11 @@ class _HomePageState extends State<HomePage> {
     ServicesPage(),
     CalendarPage(),
   ];
-
+  void updateSelectedIndex(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -80,22 +84,66 @@ class HomeScreen extends StatelessWidget {
           SizedBox(height: 20),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Text('Welcome to the Home of Pet-Owners!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Welcome to the Home of ',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Pet-Owners!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      foreground: Paint()..shader = LinearGradient(
+                        colors: <Color>[Colors.blue, Colors.purple],
+                      ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('What do you want to do today:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              'What do you want to do today:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
           ),
+
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Added padding for better spacing
-            child: Row(
+            child:Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildColoredButton(context, 'Request Appointment', Colors.green),
-                _buildColoredButton(context, 'Purchase Products', Colors.blue),
-                _buildColoredButton(context, 'Create To Do', Colors.orange),
-                _buildColoredButton(context, 'Review Pet Info', Colors.red),
+                _buildColoredButton(context, 'Request Appointment', Colors.green, () {
+                  context.findAncestorStateOfType<_HomePageState>()!.updateSelectedIndex(3);
+                }),
+                SizedBox(width: 8),
+                _buildColoredButton(context, 'Purchase Products', Colors.blue, () {
+                  context.findAncestorStateOfType<_HomePageState>()!.updateSelectedIndex(2);
+                }),
+                SizedBox(width: 8),
+                _buildColoredButton(context, 'Create To Do', Colors.orange, () {
+                  context.findAncestorStateOfType<_HomePageState>()!.updateSelectedIndex(4);
+                }),
+                SizedBox(width: 8),
+                _buildColoredButton(context, 'Review Pet Info', Colors.red, () {
+                  context.findAncestorStateOfType<_HomePageState>()!.updateSelectedIndex(1);
+                }),
               ],
             ),
           ),
@@ -116,13 +164,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildColoredButton(BuildContext context, String text, Color color) {
+  Widget _buildColoredButton(BuildContext context, String text, Color color, VoidCallback onPressed) {
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: color), // Background color
-      onPressed: () {},
+      style: ElevatedButton.styleFrom(backgroundColor: color),
+      onPressed: onPressed,
       child: Text(
         text,
-        style: TextStyle(color: Colors.white), // Text color set to white
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
