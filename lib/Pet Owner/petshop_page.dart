@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import '../models/for_pet_owner/product.dart';
-import 'cart_page.dart';
+import '../models/product.dart'; // Ensure the path to the Product model is correct
 import 'product_detail_page.dart';
+import 'cart_page.dart';
+import '../../ApiHandler.dart'; // Ensure this path matches your project structure
 
 class PetShopPage extends StatefulWidget {
   const PetShopPage({Key? key}) : super(key: key);
@@ -13,38 +13,34 @@ class PetShopPage extends StatefulWidget {
 
 class _PetShopPageState extends State<PetShopPage> {
   List<String> cartItems = [];
-  List<Product> products = [
-    Product(
-      name: 'Dog Bone',
-      description: 'A delicious treat for your canine friend.',
-      price: 5.99,
-      category: 'Food',
-      imageAsset: 'assets/dog_bone.jpg', // Ensure this asset is available in your project
-      quantityInStock: 20,
-      petGenre: 'Dogs',
-    ),
-    Product(
-      name: 'Cat Toy',
-      description: 'Fun and engaging toy for cats.',
-      price: 4.50,
-      category: 'Toys',
-      imageAsset: 'assets/cat_toys.jpg', // Make sure this asset exists in your project
-      quantityInStock: 15,
-      petGenre: 'Cats',
-    ),
-    Product(
-      name: 'Fish Food',
-      description: 'Nutritious food for all types of fish.',
-      price: 3.99,
-      category: 'Food',
-      imageAsset: 'assets/fish_food.jpg', // Make sure this asset exists in your project
-      quantityInStock: 30,
-      petGenre: 'Fish',
-    )
-    // Add more products as needed
-  ];
+  List<Product> products = [];
   String filter = 'All';
-  String searchQuery = ''; // State variable to hold the search query
+  String searchQuery = '';
+  final ApiHandler apiHandler = ApiHandler(); // Adjust this instantiation if your ApiHandler requires parameters
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    try {
+      var fetchedProducts = await apiHandler.getAllProducts(); // Make sure this method exists and is correctly implemented in your ApiHandler
+      setState(() {
+        products = fetchedProducts;
+      });
+    } catch (e) {
+      print('Failed to fetch products: $e');
+    }
+  }
+
+  void updateFilter(String newFilter) {
+    setState(() {
+      filter = newFilter;
+    });
+    fetchProducts(); // Refetch products based on the new filter
+  }
 
   void searchProducts(String query) {
     setState(() {
@@ -78,14 +74,14 @@ class _PetShopPageState extends State<PetShopPage> {
                       color: Colors.black12,
                       blurRadius: 4,
                       offset: Offset(0, 2),
-                    )
+                    ),
                   ],
                 ),
                 child: TextField(
-                  onChanged: (value) => searchProducts(value),
+                  onChanged: searchProducts,
                   decoration: InputDecoration(
                     hintText: 'Search for products',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 20),
+                    contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                     border: InputBorder.none,
                     suffixIcon: Icon(Icons.search),
                   ),
@@ -95,7 +91,7 @@ class _PetShopPageState extends State<PetShopPage> {
             SizedBox(height: 10),
             _buildFilterButtons(),
             SizedBox(height: 20),
-            _buildProductList(context),
+            _buildProductList(),
             SizedBox(height: 100),
           ],
         ),
@@ -107,41 +103,28 @@ class _PetShopPageState extends State<PetShopPage> {
             MaterialPageRoute(builder: (context) => CartPage(cartItems: cartItems)),
           );
         },
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(Icons.shopping_cart),
-            if (cartItems.isNotEmpty)
-              Positioned(
-                right: 0,
-                top: 0,
-                child: CircleAvatar(
-                  backgroundColor: Colors.red,
-                  radius: 10,
-                  child: Text(
-                    cartItems.length.toString(),
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        child: Icon(Icons.shopping_cart),
       ),
     );
   }
 
+
   Widget _buildFilterButtons() {
-    List<String> categories = ['All', 'Dogs', 'Cats', 'Fish', 'Birds', 'Reptiles'];
+    List<String> categories = ['All', 'dogs', 'cats', 'fish', 'birds', 'reptiles'];
     return Container(
-      height: 40,
+      height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
         itemBuilder: (context, index) {
-          return Container(
-            margin: EdgeInsets.symmetric(horizontal: 5),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5),
             child: ElevatedButton(
               onPressed: () => updateFilter(categories[index]),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
               child: Text(categories[index]),
             ),
           );
@@ -150,10 +133,13 @@ class _PetShopPageState extends State<PetShopPage> {
     );
   }
 
-  Widget _buildProductList(BuildContext context) {
-    List<Product> filteredProducts = products.where((p) {
-      return (filter == 'All' || p.category == filter) &&
-          (searchQuery.isEmpty || p.name.toLowerCase().contains(searchQuery));
+
+  Widget _buildProductList() {
+    // This method filters the products based on the current filter and search query
+    List<Product> filteredProducts = products.where((product) {
+      bool matchesFilter = filter == 'All' || product.petGenre == filter;
+      bool matchesSearch = searchQuery.isEmpty || product.name!.toLowerCase().contains(searchQuery);
+      return matchesFilter && matchesSearch;
     }).toList();
 
     return GridView.builder(
@@ -181,7 +167,6 @@ class _PetShopPageState extends State<PetShopPage> {
       },
     );
   }
-
   Widget _buildProductCard(Product product) {
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -189,12 +174,15 @@ class _PetShopPageState extends State<PetShopPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Image.asset(
-              product.imageAsset,
+            child: product.image != null ? Image.memory(
+              product.image!,
               fit: BoxFit.cover,
-              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                return Icon(Icons.shopping_cart, size: 50, color: Colors.grey);
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset('assets/placeholder.png');  // Ensure you have a 'placeholder.png' in your assets
               },
+            ) : Image.asset(
+              'assets/placeholder.png',  // Provide a local placeholder if no image is available
+              fit: BoxFit.cover,
             ),
           ),
           Padding(
@@ -203,24 +191,24 @@ class _PetShopPageState extends State<PetShopPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  product.name,
+                  product.name ?? "Unnamed Product",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  product.description,
+                  product.description ?? "No description available.",
                   style: TextStyle(fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  '\$${product.price.toString()}',
+                  '\$${product.price?.toStringAsFixed(2) ?? 'N/A'}',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      cartItems.add(product.name);
+                      cartItems.add(product.name!);  // Ensure 'name' is not null before adding
                     });
                   },
                   child: Text('Add to Cart'),
@@ -231,11 +219,5 @@ class _PetShopPageState extends State<PetShopPage> {
         ],
       ),
     );
-  }
-
-  void updateFilter(String newFilter) {
-    setState(() {
-      filter = newFilter;
-    });
   }
 }

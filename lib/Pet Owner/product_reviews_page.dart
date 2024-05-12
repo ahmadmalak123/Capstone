@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/for_pet_owner/product.dart';
+import '../models/product.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-
 import 'write_reviews_page.dart';
+
 const Color kPrimaryColor = Color(0xFF00C853);  // Example green color
 const Color kAccentColor = Color(0xFF6200EA);
 // Product Reviews Page

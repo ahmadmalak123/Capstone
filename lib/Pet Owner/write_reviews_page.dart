@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/for_pet_owner/product.dart';
+import '../models/product.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 // Write Review Page

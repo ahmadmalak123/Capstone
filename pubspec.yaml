@@ -92,7 +92,7 @@ flutter:
     - assets/dog_bone.jpg
     - assets/fish_food.jpg
     - assets/cat_toys.jpg
-
+    - assets/placeholder.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
