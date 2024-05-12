@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'side_pages/add_pet_page.dart';
-import 'Side_Pages/pet_details_page.dart';
+import 'pet_page_content/add_pet_page.dart';
+import 'pet_page_content/pet_details_page.dart';
 import '../models/for_pet_owner/pet.dart'; // Ensure this path is correct
 
 class PetsPage extends StatefulWidget {

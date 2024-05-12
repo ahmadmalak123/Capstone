@@ -1,11 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'pet_home_page.dart';
-import 'pets_page.dart';
-import 'petshop_page.dart';
-import 'Side_Pages/notifications_page.dart';
-import 'calendar.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'services_page_content/vet_ratings_page.dart';
 
 class ServicesPage extends StatefulWidget {
   @override
@@ -16,22 +11,23 @@ class _ServicesPageState extends State<ServicesPage> {
   late final PageController _pageController;
   final _photos = [
     {
-      'title': 'Photo 1',
-      'description': 'Description 1',
+      'title': 'Annual Check-ups',
+      'description': 'Ensure your pet’s health with yearly veterinary visits.',
       'imagePath': 'assets/Checkup1.jpeg',
     },
     {
-      'title': 'Photo 2',
-      'description': 'Description 2',
-      'imagePath': 'assets/Checkup2.jpeg',
-    },
-    {
-      'title': 'Photo 3',
-      'description': 'Description 3',
+      'title': 'Vaccination Services',
+      'description': 'Keep your pet safe with up-to-date vaccinations.',
       'imagePath': 'assets/Checkup3.jpeg',
     },
-    // Add more photos with information as needed
+    {
+      'title': 'Pet Grooming',
+      'description': 'Professional grooming services for your pet’s comfort and hygiene.',
+      'imagePath': 'assets/Checkup2.jpeg',
+    },
+    // You can add more photos and descriptions as needed.
   ];
+
   int _currentPage = 0;
 
   @override
@@ -97,20 +93,27 @@ class _ServicesPageState extends State<ServicesPage> {
             _buildServiceCard(context, 'Grooming Services', Icons.cut),
             _buildServiceCard(context, 'Diagnostic Testing', Icons.local_hospital),
             _buildServiceCard(context, 'Dental Care', Icons.masks),
+            _buildReviewCard(context),
             SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RateVetPage()),
-                  );
-                },
-                child: Text('Rate Vet'),
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+  Widget _buildReviewCard(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(20),
+      child: ListTile(
+        leading: Icon(Icons.rate_review, color: Colors.blue),
+        title: Text('Check Our Vet Ratings', style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('Read reviews and ratings of our veterinarians.'),
+        trailing: Icon(Icons.arrow_forward),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ReviewPage()),
+          );
+        },
       ),
     );
   }
@@ -252,91 +255,6 @@ class AppointmentBookingPage extends StatelessWidget {
                 // Action to confirm appointment booking
               },
               child: Text('Request Appointment'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-class RateVetPage extends StatefulWidget {
-  @override
-  _RateVetPageState createState() => _RateVetPageState();
-}
-
-class _RateVetPageState extends State<RateVetPage> {
-  final List<String> vets = ['Dr. Smith', 'Dr. Johnson', 'Dr. Emily'];  // Example vets
-  String? selectedVet;
-  double _currentRating = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Rate a Vet'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Select a Vet:', style: TextStyle(fontSize: 20)),
-            DropdownButton<String>(
-              value: selectedVet,
-              icon: const Icon(Icons.arrow_downward),
-              elevation: 16,
-              style: const TextStyle(color: Colors.deepPurple),
-              underline: Container(
-                height: 2,
-                color: Colors.deepPurpleAccent,
-              ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  selectedVet = newValue!;
-                });
-              },
-              items: vets.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20),
-            Text('Rate the Vet:', style: TextStyle(fontSize: 20)),
-            RatingBar.builder(
-              initialRating: _currentRating,
-              minRating: 1,
-              direction: Axis.horizontal,
-              allowHalfRating: true,
-              itemCount: 5,
-              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) => Icon(Icons.star, color: Colors.amber),
-              onRatingUpdate: (rating) {
-                setState(() {
-                  _currentRating = rating;
-                });
-              },
-            ),
-            SizedBox(height: 20),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter your review here',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 5,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Submit the review to the backend
-                // Here you should implement your backend logic
-                // e.g., POST request to your API
-                print('Review submitted for $selectedVet with rating $_currentRating');
-                // Place for backend integration comment
-                // "Insert your backend function here to handle the review submission"
-              },
-              child: Text('Submit Review'),
             ),
           ],
         ),
