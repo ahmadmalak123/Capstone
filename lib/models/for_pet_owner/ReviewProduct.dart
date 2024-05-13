@@ -1,5 +1,5 @@
 class ReviewProduct {
-  final int? reviewproductId;
+  final int productReviewId;
   final int? ownerId;
   final int? productId;
   final int? rating;
@@ -7,7 +7,7 @@ class ReviewProduct {
   final DateTime? date;
 
   ReviewProduct({
-    this.reviewproductId,
+    required this.productReviewId,
     this.ownerId,
     this.productId,
     this.rating,
@@ -18,7 +18,7 @@ class ReviewProduct {
   // Converts a ReviewResource object to a JSON-compatible map.
   Map<String, dynamic> toJson() {
     return {
-      'reviewId': reviewproductId,
+      'productReviewId': productReviewId,
       'ownerId': ownerId,
       'productId': productId,
       'rating': rating,
@@ -30,9 +30,9 @@ class ReviewProduct {
   // Creates a ReviewResource object from a JSON map.
   factory ReviewProduct.fromJson(Map<String, dynamic> json) {
     return ReviewProduct(
-      reviewproductId: json['reviewId'] as int?,
+      productReviewId: json['productReviewId'] as int,
       ownerId: json['ownerId'] as int?,
-      productId: json['vetId'] as int?,
+      productId: json['productId'] as int?,
       rating: json['rating'] as int?,
       comment: json['comment'] as String?,
       date: json['date'] != null ? DateTime.parse(json['date']) : null,

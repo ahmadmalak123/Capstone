@@ -172,17 +172,52 @@ class _ServicesPageState extends State<ServicesPage> {
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
                 ),
-                color: Colors.black.withOpacity(0.5), // Slightly darker for better text visibility
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+                ),
               ),
-              child: Text(
-                title + "\n" + description,
-                style: TextStyle(color: Colors.white, fontSize: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(1.0, 1.0),
+                          blurRadius: 3.0,
+                          color: Color.fromARGB(150, 0, 0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 5),  // Add space between title and description
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(1.0, 1.0),
+                          blurRadius: 3.0,
+                          color: Color.fromARGB(150, 0, 0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -190,5 +225,6 @@ class _ServicesPageState extends State<ServicesPage> {
       ),
     );
   }
+
 }
 

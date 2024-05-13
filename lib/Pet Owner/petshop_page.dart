@@ -84,15 +84,15 @@ class _PetShopPageState extends State<PetShopPage> {
         ),
       ),
       backgroundColor: Colors.white10,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CartPage(cartItems: cartItems)),
-          );
-        },
-        child: Icon(Icons.shopping_cart),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => CartPage(cartItems: cartItems)),
+      //     );
+      //   },
+      //   child: Icon(Icons.shopping_cart),
+      // ),
     );
   }
 
@@ -202,17 +202,17 @@ class _PetShopPageState extends State<PetShopPage> {
                   '\$${product.price?.toStringAsFixed(2) ?? 'N/A'}',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),  // Adjusted font size
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        cartItems.add(product.name!);  // Ensure 'name' is not null before adding
-                      });
-                    },
-                    child: Text('Add to Cart', style: TextStyle(fontSize: 12)),  // Reduced font size on button
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(
+                //     onPressed: () {
+                //       setState(() {
+                //         cartItems.add(product.name!);  // Ensure 'name' is not null before adding
+                //       });
+                //     },
+                //     child: Text('Add to Cart', style: TextStyle(fontSize: 12)),  // Reduced font size on button
+                //   ),
+                // ),
               ],
             ),
           ),

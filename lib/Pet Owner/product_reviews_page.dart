@@ -70,7 +70,15 @@ class _ProductReviewsPageState extends State<ProductReviewsPage> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => WriteReviewPage(product: widget.product)),
-            );
+            ).then((value) {
+              if (value != null && value == true) {
+                // If review was successfully added, refresh reviews
+                setState(() {
+                  _reviewsFuture = _fetchReviews();
+                });
+              }
+            });
+
           },
           child: Text('Rate Vet'),
           style: ElevatedButton.styleFrom(

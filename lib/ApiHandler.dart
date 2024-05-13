@@ -330,6 +330,7 @@ class ApiHandler {
       throw Exception('Failed to delete appointment: ${response.statusCode}');
     }
   }
+
   Future<void> createAppointment(Appointment appointment) async {
     final url = Uri.parse('$baseUrl/appointment');
 
@@ -472,7 +473,7 @@ class ApiHandler {
   // Create a new medical record
   Future<bool> createMedicalRecord(Map<String, dynamic> data) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/MedicalRecord'),
+      Uri.parse('$baseUrl/medical-records'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(data),
     );
@@ -482,7 +483,7 @@ class ApiHandler {
   // Update an existing medical record
   Future<bool> updateMedicalRecord(int recordId, Map<String, dynamic> data) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/MedicalRecord/$recordId'),
+      Uri.parse('$baseUrl/medical-records/$recordId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(data),
     );
@@ -492,7 +493,7 @@ class ApiHandler {
   // Delete a medical record
   Future<bool> deleteMedicalRecord(int recordId) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/MedicalRecord/$recordId'),
+      Uri.parse('$baseUrl/medical-records/$recordId'),
     );
     return response.statusCode == 204;
   }
@@ -500,15 +501,17 @@ class ApiHandler {
   // Retrieve all medical records for a specific pet
   Future<List<MedicalRecord>> getAllMedicalRecordsByPetId(int petId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/MedicalRecord/$petId'),
+      Uri.parse('$baseUrl/medical-records/pet/$petId'),
     );
 
     if (response.statusCode == 200) {
       List<dynamic> recordJson = jsonDecode(response.body);
       return recordJson.map((json) => MedicalRecord.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load medical records');
+      // Log detailed error information
+      throw Exception('Failed to load medical records: Status code ${response.statusCode}, Body: ${response.body}');
     }
+
   }
 
 
@@ -580,7 +583,7 @@ class ApiHandler {
   }
 
   Future<List<Review>> getProductReviewById(int ownerId) async {
-    final response = await http.get(Uri.parse('$baseUrl/ProductReview/$ownerId'));
+    final response = await http.get(Uri.parse('$baseUrl/ProductReview/Product/$ownerId'));
 
     if (response.statusCode == 200) {
       List<dynamic> jsonList = jsonDecode(response.body);
@@ -616,6 +619,7 @@ class ApiHandler {
       return false;
     }
   }
+
   Future<Pet> getPetById(int petId) async {
     var url = Uri.parse('$baseUrl/pet/$petId');
     try {
@@ -633,5 +637,6 @@ class ApiHandler {
       throw Exception('Failed to fetch pet: $e');
     }
   }
+
 }
 

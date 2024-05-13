@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:open_file/open_file.dart';
 import '../../models/for_pet_owner/Ownerpet.dart';
 import '../../models/for_vet/MedicalRecord.dart';
 import 'edit_pet_details_page.dart';
+import '../../ApiHandler.dart';
 
 class PetDetailsPage extends StatefulWidget {
   final Pet pet;
@@ -18,53 +13,35 @@ class PetDetailsPage extends StatefulWidget {
   _PetDetailsPageState createState() => _PetDetailsPageState();
 }
 
-class _PetDetailsPageState extends State<PetDetailsPage> {
+class _PetDetailsPageState extends State<PetDetailsPage> with SingleTickerProviderStateMixin {
   late Pet _pet;
-  late List<MedicalRecord> medicalRecords;
+  late TabController _tabController;
+  Future<List<MedicalRecord>>? _medicalRecordsFuture;
 
   @override
   void initState() {
     super.initState();
     _pet = widget.pet;
-    medicalRecords = [
-      MedicalRecord(
-        recordId: 1,
-        petId: 1,
-        description: "Annual Vaccination",
-        service: "Vaccination",
-        testResults: null,
-        date: DateTime.now().subtract(Duration(days: 60)),
-        status: "Pending",
-      ),
-      MedicalRecord(
-        recordId: 2,
-        petId: 1,
-        description: "Routine Blood Test",
-        service: "Blood Test",
-        testResults: Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
-        date: DateTime.now().subtract(Duration(days: 30)),
-        status: "Completed",
-      ),
-    ];
+    _tabController = TabController(length: 2, vsync: this);
+    _loadMedicalRecords();
   }
 
-  void _navigateAndDisplayUpdate(BuildContext context) async {
-    final updatedPet = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EditPetDetailsPage(pet: _pet)),
-    );
-
-    if (updatedPet != null) {
-      setState(() {
-        _pet = updatedPet;
-      });
-      // Signal the calling page (PetsPage) that an update has occurred
-      Navigator.pop(context, updatedPet);
+  void _loadMedicalRecords() {
+    if (_pet.petId != null) {
+      _medicalRecordsFuture = ApiHandler().getAllMedicalRecordsByPetId(_pet.petId);
+    } else {
+      // Handle null petId, maybe set a local error message
+      print("Error: Pet ID is null");
     }
   }
 
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -80,7 +57,7 @@ class _PetDetailsPageState extends State<PetDetailsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+          children: [
             Container(
               height: 200,
               width: double.infinity,
@@ -103,15 +80,79 @@ class _PetDetailsPageState extends State<PetDetailsPage> {
             _buildDetailRow(Icons.pets, 'Breed: ${_pet.breed ?? "Unknown"}'),
             _buildDetailRow(Icons.cake, 'DOB: ${_pet.dob?.toIso8601String().split('T').first ?? "Unknown"}'),
             SizedBox(height: 20),
-            Text('Medical Records', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            ...medicalRecords.map((record) => _buildMedicalRecord(context, record)).toList(),
+            _buildMedicalRecordsSection(),
           ],
         ),
       ),
     );
   }
 
+  // Widget _buildPetImageSection() {
+  //   return Container(
+  //     height: 200,
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey[200],
+  //       borderRadius: BorderRadius.circular(8),
+  //       image: _pet.image != null
+  //           ? DecorationImage(
+  //         image: MemoryImage(_pet.image!),
+  //         fit: BoxFit.cover,
+  //       )
+  //           : null,
+  //     ),
+  //     child: _pet.image == null ? Center(child: Icon(Icons.pets, size: 80, color: Colors.grey[500])) : null,
+  //   );
+  // }
+
+  // Widget _buildPetDetails() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: Column(
+  //       children: [
+  //         Text('Name: ${_pet.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+  //         _buildDetailRow(Icons.transgender, 'Gender: ${_pet.gender ?? "Unknown"}'),
+  //         _buildDetailRow(Icons.category, 'Species: ${_pet.species ?? "Unknown"}'),
+  //         _buildDetailRow(Icons.pets, 'Breed: ${_pet.breed ?? "Unknown"}'),
+  //         _buildDetailRow(Icons.cake, 'DOB: ${_pet.dob?.toIso8601String().split('T').first ?? "Unknown"}'),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildMedicalRecordsSection() {
+    return Container(
+      child: Column(
+        children: [
+          Text('Medical Records', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          SizedBox(height: 10),
+          Container(
+            height: 300,
+            child: Column(
+              children: [
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: "Pending"),
+                    Tab(text: "Complete"),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _medicalStatusView('Pending'),
+                      _medicalStatusView('Complete'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildDetailRow(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -125,33 +166,62 @@ class _PetDetailsPageState extends State<PetDetailsPage> {
     );
   }
 
-  Widget _buildMedicalRecord(BuildContext context, MedicalRecord record) {
+  Widget _medicalStatusView(String status) {
+    return FutureBuilder<List<MedicalRecord>>(
+      future: _medicalRecordsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Failed to load records: ${snapshot.error}"));
+        } else if (snapshot.data != null && snapshot.data!.isEmpty) {
+          return Center(child: Text("No records for $status"));
+        } else if (snapshot.hasData) {
+          List<MedicalRecord> filteredRecords = snapshot.data!
+              .where((record) => record.status == status)
+              .toList();
+          return ListView(
+            children: filteredRecords.map((record) => _buildMedicalRecordCard(record)).toList(),
+          );
+        } else {
+          return Center(child: Text("No medical records found"));
+        }
+      },
+    );
+  }
+
+
+
+  Widget _buildMedicalRecordCard(MedicalRecord record) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      elevation: 4, // Adds a subtle shadow to the card
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12), // Increased padding for better visual spacing
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(record.description ?? "No Description", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 4),
-            Text("Service: ${record.service ?? "Unknown"}", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 4),
-            Text("Date: ${record.date?.toIso8601String().split('T').first ?? "Unknown"}", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 4),
-            Text("Status: ${record.status ?? "Unknown"}", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                record.testResults != null ? ElevatedButton(
-                  onPressed: () => _downloadPdf(context, record),
-                  child: Text('Download'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                ) : Container(),
-              ],
+            Text(
+              record.service ?? "Unknown Service",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              record.description ?? "No description provided",
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              "Date: ${record.date?.toIso8601String().split('T').first ?? "Unknown date"}",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
             ),
           ],
         ),
@@ -159,24 +229,18 @@ class _PetDetailsPageState extends State<PetDetailsPage> {
     );
   }
 
-  Future<void> _downloadPdf(BuildContext context, MedicalRecord record) async {
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Center(
-          child: pw.Text(record.description ?? "No Description"),
-        ),
-      ),
-    );
-    final bytes = await pdf.save();
 
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/testResults.pdf');
-    await file.writeAsBytes(bytes);
-
-    // Show a snackbar or a dialog after download
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Downloaded to ${file.path}')),
+  void _navigateAndDisplayUpdate(BuildContext context) async {
+    final updatedPet = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditPetDetailsPage(pet: _pet)),
     );
+
+    if (updatedPet != null) {
+      setState(() {
+        _pet = updatedPet;
+      });
+      Navigator.pop(context, updatedPet);
+    }
   }
 }

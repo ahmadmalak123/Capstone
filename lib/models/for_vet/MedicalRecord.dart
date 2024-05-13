@@ -1,5 +1,3 @@
-
-
 class MedicalRecord {
   final int recordId;
   final int? petId;

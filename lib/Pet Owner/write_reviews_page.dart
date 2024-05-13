@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../IdProvider.dart';
 import '../models/product.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../models/for_pet_owner/ReviewProduct.dart';
@@ -6,18 +7,6 @@ import '../../ApiHandler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
-class IdProvider with ChangeNotifier {
-  int _id;
-
-  IdProvider(this._id);
-
-  int get id => _id;
-
-  set id(int value) {
-    _id = value;
-    notifyListeners();
-  }
-}
 
 class WriteReviewPage extends StatefulWidget {
   final Product product;
@@ -75,7 +64,7 @@ class _WriteReviewPageState extends State<WriteReviewPage> {
               onPressed: () async {
                 // Assuming you have an IdProvider and ApiHandler properly set up
                 ReviewProduct review = ReviewProduct(
-                  reviewproductId: null,
+                  productReviewId: 0,
                   ownerId: Provider.of<IdProvider>(context, listen: false).id,  // Correct this line as per your implementation
                   productId: widget.product.productId,
                   rating: _currentRating,
@@ -87,7 +76,7 @@ class _WriteReviewPageState extends State<WriteReviewPage> {
                 try {
                   bool savedReview = await apiHandler.createProductReview(review) ?? false;  // Ensure this method is expecting a ReviewProduct
                   if (savedReview) {
-                    Navigator.pop(context, true);
+                    Navigator.pop(context, true); // Indicates successful review submission
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save review')));
                   }
@@ -95,9 +84,9 @@ class _WriteReviewPageState extends State<WriteReviewPage> {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving review: $e')));
                 }
               },
-              child: Text('Submit Review'),
+              child: Text('Submit Review',style: TextStyle(color: Colors.white),),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: Colors.orangeAccent,
               ),
             ),
           ],

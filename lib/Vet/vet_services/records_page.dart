@@ -5,6 +5,11 @@ import '../../models/for_vet/vet_pet.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class MedicalRecordsPage extends StatefulWidget {
   @override
@@ -310,16 +315,6 @@ class _CreateMedicalRecordPageState extends State<CreateMedicalRecordPage> {
   String _status = 'Pending';
   List<Uint8List>? _testResults;
 
-  // Function to handle picking files
-  Future<void> _pickFiles() async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
-    if (result != null) {
-      setState(() {
-        _testResults = result.files.map((file) => file.bytes!).toList();
-      });
-    }
-  }
-
   // Function to convert files to base64 strings
   List<String>? _encodeFiles(List<Uint8List>? files) {
     return files?.map((file) => base64Encode(file)).toList();
@@ -337,12 +332,17 @@ class _CreateMedicalRecordPageState extends State<CreateMedicalRecordPage> {
         'Status': _status,
       };
 
-      bool success = await ApiHandler().createMedicalRecord(data);
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Medical record created')));
-        Navigator.pop(context, true); // Return true to indicate the list needs refreshing
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create record')));
+      try {
+        bool success = await ApiHandler().createMedicalRecord(data);
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Medical record created')));
+          Navigator.pop(context, true); // Return true to indicate the list needs refreshing
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to create record')));
+        }
+      } catch (e) {
+        print('Error creating medical record: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('An error occurred. Please try again later.')));
       }
     }
   }
@@ -353,65 +353,78 @@ class _CreateMedicalRecordPageState extends State<CreateMedicalRecordPage> {
       appBar: AppBar(
         title: Text('Create Medical Record for ${widget.petId}'),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
-              validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
-            ),
-            TextFormField(
-              controller: _serviceController,
-              decoration: InputDecoration(labelText: 'Service'),
-            ),
-            ListTile(
-              title: Text(_dateAdministered == null ? 'Date Administered' : 'Administered On: ${_dateAdministered!.toString().split(' ')[0]}'),
-              trailing: Icon(Icons.calendar_today),
-              onTap: () async {
-                DateTime? picked = await showDatePicker(
-                  context: context,
-                  initialDate: _dateAdministered ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) {
-                  setState(() => _dateAdministered = picked);
-                }
-              },
-            ),
-            DropdownButtonFormField<String>(
-              value: _status,
-              decoration: InputDecoration(labelText: 'Status'),
-              items: ['Pending', 'Complete'].map((status) {
-                return DropdownMenuItem(value: status, child: Text(status));
-              }).toList(),
-              onChanged: (value) => setState(() => _status = value!),
-            ),
-            ElevatedButton(
-              onPressed: _pickFiles,
-              child: Text('Upload Test Results'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _serviceController,
+                decoration: InputDecoration(
+                  labelText: 'Service',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            if (_testResults != null)
-              Text('Files selected: ${_testResults!.length}'),
-            ElevatedButton(
-              onPressed: _submitForm,
-              child: Text('Create'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+              SizedBox(height: 20), // Add spacing
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 5, // Enlarge the description input field
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Enter description here...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
               ),
-            ),
-          ],
+              SizedBox(height: 20), // Add spacing
+              DropdownButtonFormField<String>(
+                value: _status,
+                decoration: InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
+                items: ['Pending', 'Complete'].map((status) {
+                  return DropdownMenuItem(value: status, child: Text(status));
+                }).toList(),
+                onChanged: (value) => setState(() => _status = value!),
+              ),
+              SizedBox(height: 20), // Add spacing
+              ListTile(
+                title: Text(_dateAdministered == null ? 'Date Administered' : 'Administered On: ${_dateAdministered!.toString().split(' ')[0]}'),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: _dateAdministered ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    setState(() => _dateAdministered = picked);
+                  }
+                },
+              ),
+              SizedBox(height: 20), // Add spacing
+              if (_testResults != null)
+                Text('Files selected: ${_testResults!.length}'),
+              SizedBox(height: 20), // Add spacing
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: Text('Create'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 class UpdateMedicalRecordPage extends StatefulWidget {
   final MedicalRecord medicalRecord;
@@ -456,8 +469,6 @@ class _UpdateMedicalRecordPageState extends State<UpdateMedicalRecordPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update record')));
       }
-
-
     }
   }
 
@@ -471,7 +482,6 @@ class _UpdateMedicalRecordPageState extends State<UpdateMedicalRecordPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -484,51 +494,70 @@ class _UpdateMedicalRecordPageState extends State<UpdateMedicalRecordPage> {
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
-              validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
-            ),
-            TextFormField(
-              controller: _serviceController,
-              decoration: InputDecoration(labelText: 'Service'),
-            ),
-            ListTile(
-              title: Text(_date == null ? 'Date' : 'On: ${_date!.toString().split(' ')[0]}'),
-              trailing: Icon(Icons.calendar_today),
-              onTap: () async {
-                DateTime? picked = await showDatePicker(
-                  context: context,
-                  initialDate: _date ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) setState(() => _date = picked);
-              },
-            ),
-            DropdownButtonFormField<String>(
-              value: _status,
-              decoration: InputDecoration(labelText: 'Status'),
-              items: ['Pending', 'Complete'].map((status) {
-                return DropdownMenuItem(value: status, child: Text(status));
-              }).toList(),
-              onChanged: (value) => setState(() => _status = value!),
-            ),
-            ElevatedButton(
-              onPressed: _submitForm,
-              child: Text('Update'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _serviceController,
+                decoration: InputDecoration(
+                  labelText: 'Service',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-          ],
+              SizedBox(height: 20), // Add spacing
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 5, // Enlarge the description input field
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Enter description here...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
+              ),
+              SizedBox(height: 20), // Add spacing
+              DropdownButtonFormField<String>(
+                value: _status,
+                decoration: InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
+                items: ['Pending', 'Complete'].map((status) {
+                  return DropdownMenuItem(value: status, child: Text(status));
+                }).toList(),
+                onChanged: (value) => setState(() => _status = value!),
+              ),
+              SizedBox(height: 20), // Add spacing
+              ListTile(
+                title: Text(_date == null ? 'Date' : 'On: ${_date!.toString().split(' ')[0]}'),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: _date ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => _date = picked);
+                },
+              ),
+              SizedBox(height: 20), // Add spacing
+              ElevatedButton(
+                onPressed: _submitForm,
+                child: Text('Update'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
