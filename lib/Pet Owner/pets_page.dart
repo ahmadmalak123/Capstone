@@ -1,10 +1,11 @@
 import 'dart:typed_data';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'pet_page_content/add_pet_page.dart';
-import 'pet_page_content/pet_details_page.dart';
-import '../models/for_pet_owner/pet.dart'; // Ensure this path is correct
+import 'package:provider/provider.dart';
+import '../APiHandler.dart';
+import '../IdProvider.dart';
+import 'side_pages/add_pet_page.dart';
+import 'side_pages/pet_details_page.dart';
+import '../models/for_pet_owner/Ownerpet.dart';
 
 class PetsPage extends StatefulWidget {
   PetsPage({Key? key}) : super(key: key);
@@ -22,45 +23,38 @@ class _PetsPageState extends State<PetsPage> {
     _loadPets();
   }
 
+  /// Fetches the list of pets for the current owner from the API
   Future<void> _loadPets() async {
-    final miloImage = await _loadImage('assets/milo_OG.jpg');
-    final lunaImage = await _loadImage('assets/luna_OG.jpeg');
-
-    final milo = Pet(
-      petId: 1,
-      ownerId: 1,
-      name: 'Milo',
-      gender: 'Male',
-      species: 'Cat',
-      breed: 'Siamese',
-      dob: DateTime(2020, 1, 1),
-      image: miloImage,
-    );
-    final luna = Pet(
-      petId: 2,
-      ownerId: 1,
-      name: 'Luna',
-      gender: 'Female',
-      species: 'Dog',
-      breed: 'Labrador',
-      dob: DateTime(2021, 2, 2),
-      image: lunaImage,
-    );
-
-    setState(() {
-      pets = [milo, luna];
-    });
-  }
-
-  Future<Uint8List?> _loadImage(String path) async {
+    final ownerId = Provider.of<IdProvider>(context, listen: false).id ?? 0;
     try {
-      final byteData = await rootBundle.load(path);
-      return byteData.buffer.asUint8List();
+      final petsJsonList = await ApiHandler().getPetsByOwnerId(ownerId);
+      List<Pet> parsedPets = petsJsonList.map<Pet>((json) => Pet.fromJson(json)).toList();
+      setState(() {
+        pets = parsedPets;
+      });
     } catch (e) {
-      print('Could not load image $path: $e');
-      return null;
+      print('Error fetching pets: $e');
     }
   }
+
+  /// Navigates to the PetDetailsPage and checks if an update occurred
+  void _navigateAndUpdatePets(BuildContext context, Pet pet) async {
+    final updatedPet = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PetDetailsPage(pet: pet)),
+    );
+
+    if (updatedPet != null && updatedPet is Pet) {
+      // Find and update the pet in the list
+      int index = pets.indexWhere((p) => p.petId == updatedPet.petId);
+      if (index != -1) {
+        setState(() {
+          pets[index] = updatedPet;
+        });
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +81,14 @@ class _PetsPageState extends State<PetsPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final addedPet = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddPetPage()),
           );
+          if (addedPet != null) {
+            _loadPets(); // Reload the list of pets after adding a new pet
+          }
         },
         child: Icon(Icons.add),
       ),
@@ -139,12 +136,7 @@ class _PetsPageState extends State<PetsPage> {
       itemCount: pets.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PetDetailsPage(pet: pets[index])),
-            );
-          },
+          onTap: () => _navigateAndUpdatePets(context, pets[index]),
           child: Card(
             margin: EdgeInsets.all(10),
             child: Padding(
@@ -213,12 +205,7 @@ class _PetsPageState extends State<PetsPage> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => PetDetailsPage(pet: pets[index])),
-                      );
-                    },
+                    onPressed: () => _navigateAndUpdatePets(context, pets[index]),
                     child: Text('View Profile'),
                   ),
                 ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../APiHandler.dart';
 import '../../models/for_vet/MedicalRecord.dart';
-import '../../models/for_vet/pet.dart';
+import '../../models/for_vet/vet_pet.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -12,9 +12,9 @@ class MedicalRecordsPage extends StatefulWidget {
 }
 
 class _MedicalRecordsPageState extends State<MedicalRecordsPage> {
-  late Future<List<Pet>> _petsFuture;
-  List<Pet> _allPets = [];
-  List<Pet> _filteredPets = [];
+  late Future<List<Vet_Pet>> _petsFuture;
+  List<Vet_Pet> _allPets = [];
+  List<Vet_Pet> _filteredPets = [];
   TextEditingController _searchController = TextEditingController();
 
   @override
@@ -69,7 +69,7 @@ class _MedicalRecordsPageState extends State<MedicalRecordsPage> {
           ),
         ),
       ),
-      body: FutureBuilder<List<Pet>>(
+      body: FutureBuilder<List<Vet_Pet>>(
         future: _petsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -119,7 +119,7 @@ class _MedicalRecordsPageState extends State<MedicalRecordsPage> {
 
 
 class MedicalRecordsDetailsPage extends StatefulWidget {
-  final Pet pet;
+  final Vet_Pet pet;
 
   MedicalRecordsDetailsPage({required this.pet});
 

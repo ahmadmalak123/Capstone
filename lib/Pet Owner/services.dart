@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'add_appointment.dart';
 import 'services_page_content/vet_ratings_page.dart';
 
 class ServicesPage extends StatefulWidget {
@@ -191,74 +192,3 @@ class _ServicesPageState extends State<ServicesPage> {
   }
 }
 
-class AppointmentBookingPage extends StatelessWidget {
-  final String serviceName;
-
-  const AppointmentBookingPage({Key? key, required this.serviceName}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Book Appointment'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Service: $serviceName',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Select Date:',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                // Action to select date
-              },
-              child: Text('Select Date'),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Select Vet:',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            // Add dropdown or other input for vet selection
-            ElevatedButton(
-              onPressed: () {
-                // Action to select vet
-              },
-              child: Text('Select Vet'),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Comments:',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Enter comments (optional)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Action to confirm appointment booking
-              },
-              child: Text('Request Appointment'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

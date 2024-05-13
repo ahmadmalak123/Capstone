@@ -4,9 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:petcare/models/for_vet/review.dart';
 import 'models/Equipment.dart';
 import 'models/PetOwner.dart';
+import 'models/for_pet_owner/Ownerpet.dart';
+import 'models/for_pet_owner/ReviewProduct.dart';
+import 'models/for_pet_owner/ReviewVet.dart';
 import 'models/for_vet/MedicalRecord.dart';
 import 'models/for_vet/appointment.dart';
-import 'models/for_vet/pet.dart';
+import 'models/for_vet/vet_pet.dart';
 import 'models/for_vet/vaccine.dart';
 import 'models/veterinarian.dart';
 import 'models/product.dart';
@@ -327,7 +330,6 @@ class ApiHandler {
       throw Exception('Failed to delete appointment: ${response.statusCode}');
     }
   }
-
   Future<void> createAppointment(Appointment appointment) async {
     final url = Uri.parse('$baseUrl/appointment');
 
@@ -385,12 +387,23 @@ class ApiHandler {
     }
   }
 
-  Future<List<Pet>> fetchPets() async {
+  Future<List<Appointment>> fetchAppointmentsbyOwnerid(OwnerId) async {
+    final response = await http.get(Uri.parse('$baseUrl/appointment/owner/$OwnerId'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> appointmentsJson = jsonDecode(response.body);
+      return appointmentsJson.map((json) => Appointment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load appointments');
+    }
+  }
+
+  Future<List<Vet_Pet>> fetchPets() async {
     final response = await http.get(Uri.parse('$baseUrl/Pet/details'));
 
     if (response.statusCode == 200) {
       List<dynamic> petsJson = jsonDecode(response.body);
-      return petsJson.map((json) => Pet.fromJson(json)).toList();
+      return petsJson.map((json) => Vet_Pet.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load pets');
     }
@@ -408,21 +421,7 @@ class ApiHandler {
     }
   }
 
-// Create a new pet
-  Future<Pet> createPet(Pet pet) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/pet'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(pet.toJson()),
-    );
-    if (response.statusCode == 201) {
-      return Pet.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to create pet');
-    }
-  }
+
   Future<List<dynamic>> getPetsByOwnerId(int ownerId) async {
     final String endpoint = "$baseUrl/Pet/by-owner/$ownerId";
     try {
@@ -441,19 +440,7 @@ class ApiHandler {
     }
   }
 
-  Future<void> updatePet(int petId, Map<String, dynamic> petResource) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/pet/$petId'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(petResource),
-    );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update the pet');
-    }
-  }
 
   Future<bool> createVaccination(Map<String, dynamic> data) async {
     final response = await http.post(
@@ -525,5 +512,126 @@ class ApiHandler {
   }
 
 
+  Future<Pet> createPet(Pet pet) async {
+    final String endpoint = '$baseUrl/Pet';
+    final Map<String, dynamic> petData = {
+      'ownerId': pet.ownerId,
+      'name': pet.name,
+      'gender': pet.gender,
+      'species': pet.species,
+      'breed': pet.breed,
+      'dob': pet.dob?.toIso8601String(),
+      'image': pet.image != null ? base64Encode(pet.image!) : '',
+    };
+
+    final response = await http.post(
+      Uri.parse(endpoint),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(petData),
+    );
+
+    if (response.statusCode == 201) {
+      return Pet.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create pet. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<bool> updatePet(int petId, Pet pet) async {
+    final String endpoint = '$baseUrl/Pet/$petId';
+    final Map<String, dynamic> petData = {
+      'ownerId': pet.ownerId,
+      'name': pet.name,
+      'gender': pet.gender,
+      'species': pet.species,
+      'breed': pet.breed,
+      'dob': pet.dob?.toIso8601String(),
+      'image': pet.image != null ? base64Encode(pet.image!) : '',
+    };
+
+    final response = await http.put(
+      Uri.parse(endpoint),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(petData),
+    );
+
+    return response.statusCode == 200;
+  }
+
+  // Create Review function
+  Future<bool?> createReview(ReviewVet review) async {
+    final url = Uri.parse('$baseUrl/Review'); // Adjust the endpoint if necessary
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(review.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      // Log the error message for more information
+      print('Failed to post review: ${response.statusCode}');
+      print('Error: ${response.body}');
+      return false;
+    }
+  }
+
+  Future<List<Review>> getProductReviewById(int ownerId) async {
+    final response = await http.get(Uri.parse('$baseUrl/ProductReview/$ownerId'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonList = jsonDecode(response.body);
+      List<Review> reviews = jsonList.map((json) => Review(
+        firstName: json['firstName'],
+        lastName: json['lastName'],
+        rating: json['rating'],
+        comment: json['comment'],
+        date: DateTime.parse(json['date']),
+      )).toList();
+      return reviews;
+    } else {
+      throw Exception('Failed to load reviews');
+    }
+  }
+  // Create Review function
+  Future<bool?> createProductReview(ReviewProduct review) async {
+    final url = Uri.parse('$baseUrl/ProductReview'); // Adjust the endpoint if necessary
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(review.toJson()),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      // Log the error message for more information
+      print('Failed to post review: ${response.statusCode}');
+      print('Error: ${response.body}');
+      return false;
+    }
+  }
+  Future<Pet> getPetById(int petId) async {
+    var url = Uri.parse('$baseUrl/pet/$petId');
+    try {
+      var response = await http.get(url, headers: {
+        'Content-Type': 'application/json',
+      });
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        return Pet.fromJson(jsonResponse); // Using the Pet.fromJson factory method
+      } else {
+        throw Exception('Failed to load pet with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Failed to fetch pet: $e');
+      throw Exception('Failed to fetch pet: $e');
+    }
+  }
 }
 

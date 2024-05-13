@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../APiHandler.dart';
-import '../../models/for_vet/pet.dart';
+import '../../models/for_vet/vet_pet.dart';
 import '../../models/for_vet/vaccine.dart';
 
 class VaccinationHistoryPage extends StatefulWidget {
@@ -9,9 +9,9 @@ class VaccinationHistoryPage extends StatefulWidget {
 }
 
 class _VaccinationHistoryPageState extends State<VaccinationHistoryPage> {
-  late Future<List<Pet>> _petsFuture;
-  List<Pet> _allPets = []; // Stores all pets once loaded
-  List<Pet> _filteredPets = []; // Stores the filtered results
+  late Future<List<Vet_Pet>> _petsFuture;
+  List<Vet_Pet> _allPets = []; // Stores all pets once loaded
+  List<Vet_Pet> _filteredPets = []; // Stores the filtered results
   TextEditingController _searchController = TextEditingController();
 
   @override
@@ -68,7 +68,7 @@ class _VaccinationHistoryPageState extends State<VaccinationHistoryPage> {
           ),
         ),
       ),
-      body: FutureBuilder<List<Pet>>(
+      body: FutureBuilder<List<Vet_Pet>>(
         future: _petsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -121,7 +121,7 @@ class _VaccinationHistoryPageState extends State<VaccinationHistoryPage> {
 }
 
 class PetVaccinationDetailsPage extends StatefulWidget {
-  final Pet pet;
+  final Vet_Pet pet;
 
   PetVaccinationDetailsPage({required this.pet});
 

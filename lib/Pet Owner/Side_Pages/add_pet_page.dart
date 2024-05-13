@@ -1,8 +1,11 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../models/for_pet_owner/pet.dart';
-import '../pets_page.dart'; // Assuming this is the path to your PetsPage
+import '../../APiHandler.dart';
+import '../../IdProvider.dart';
+import '../../models/for_pet_owner/Ownerpet.dart';
+import '../pets_page.dart'; // Adjust as needed
 
 class AddPetPage extends StatefulWidget {
   const AddPetPage({Key? key}) : super(key: key);
@@ -31,19 +34,26 @@ class _AddPetPageState extends State<AddPetPage> {
     }
   }
 
-  void _addPet() {
+  Future<void> _addPet() async {
     DateTime? dob;
     try {
       dob = DateTime.parse(_dobController.text);
     } catch (e) {
-      // Handle or log error, maybe show a message that the date format is invalid
       print("Error parsing date: $e");
+    }
+
+    // Retrieve the owner ID from the provider
+    final ownerId = Provider.of<IdProvider>(context, listen: false).id;
+    if (ownerId == null) {
+      // Handle the case where owner ID is not available
+      print('Owner ID not found');
+      return;
     }
 
     // Create the new pet instance
     final newPet = Pet(
-      petId: DateTime.now().millisecondsSinceEpoch, // Simple way to generate a unique ID
-      ownerId: 1, // Example owner ID, adjust as necessary
+      petId: 0, // Placeholder; actual ID will be set by the backend
+      ownerId: ownerId,
       name: _nameController.text,
       species: _speciesController.text,
       breed: _breedController.text,
@@ -52,9 +62,17 @@ class _AddPetPageState extends State<AddPetPage> {
       image: _imageData,
     );
 
-    // Here you would typically add this newPet to your state management system
-    // For demonstration, we're just popping back to the previous screen
-    Navigator.of(context).pop(newPet);
+    try {
+      // Send a request to the backend to add the pet
+      final apiHandler = ApiHandler();
+      final createdPet = await apiHandler.createPet(newPet);
+
+      // Navigate back to the pets page with the newly added pet
+      Navigator.of(context).pop(createdPet);
+    } catch (e) {
+      print('Error creating pet: $e');
+      // Optionally, show an error message to the user
+    }
   }
 
   @override
@@ -77,12 +95,16 @@ class _AddPetPageState extends State<AddPetPage> {
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
-                    image: _imageData != null ? DecorationImage(
+                    image: _imageData != null
+                        ? DecorationImage(
                       image: MemoryImage(_imageData!),
                       fit: BoxFit.cover,
-                    ) : null,
+                    )
+                        : null,
                   ),
-                  child: _imageData == null ? Icon(Icons.photo_camera, size: 50) : null,
+                  child: _imageData == null
+                      ? Icon(Icons.photo_camera, size: 50)
+                      : null,
                 ),
               ),
             ),

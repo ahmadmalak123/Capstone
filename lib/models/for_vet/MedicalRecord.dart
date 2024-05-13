@@ -1,4 +1,5 @@
 
+
 class MedicalRecord {
   final int recordId;
   final int? petId;
@@ -30,14 +31,12 @@ class MedicalRecord {
           : null,
       date: json['date'] != null ? DateTime.parse(json['date']) : null,
       status: json['status'],
-
     );
   }
 
   // To JSON (serialization)
   Map<String, dynamic> toJson() {
     return {
-
       'recordId': recordId,
       'petId': petId,
       'description': description,
@@ -48,4 +47,3 @@ class MedicalRecord {
     };
   }
 }
-

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import 'product_reviews_page.dart';
 
-// Define a global or local theme color variable as needed
-const Color kAccentColor = Colors.blue;  // Define this in your global settings if not already
+// Define a theme color variable, ensure it's accessible in your settings
+const Color kPrimaryColor = Colors.deepPurple;
+const Color kAccentColor = Colors.deepOrange;
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;
@@ -14,46 +15,54 @@ class ProductDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Details'),
-        backgroundColor: Colors.transparent,
+        title: Text('Product Details'), // Use consistent theme color
         elevation: 0,
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(height: 20),
             product.image != null
                 ? Image.memory(
               product.image!,
+              height: 250, // Fixed height for consistency
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                return Icon(Icons.image, size: 50, color: Colors.grey); // Fallback if image fails
+                return Icon(Icons.broken_image, size: 128, color: Colors.grey);
               },
             )
-                : Image.asset('assets/placeholder.jpeg', fit: BoxFit.cover),  // Placeholder image
+                : Image.asset('assets/placeholder.jpeg', height: 250, fit: BoxFit.cover),
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.name ?? "No name available", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                  Text(product.description ?? "No description available", textAlign: TextAlign.center),
-                  Text('Price: \$${product.price?.toStringAsFixed(2) ?? 'N/A'}', style: TextStyle(color: Colors.green), textAlign: TextAlign.center),
-                  Text('Category: ${product.category ?? 'N/A'}', textAlign: TextAlign.center),
-                  Text('Quantity in Stock: ${product.quantity?.toString() ?? 'N/A'}', textAlign: TextAlign.center),
-                  Text('Pet Genre: ${product.petGenre ?? 'N/A'}', textAlign: TextAlign.center),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProductReviewsPage(product: product)),
-                      );
-                    },
-                    child: Text('View Reviews', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kAccentColor,
+                  Text(product.name ?? "No name available", style: Theme.of(context).textTheme.headline6!.copyWith(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Text(product.description ?? "No description available", style: Theme.of(context).textTheme.subtitle1),
+                  SizedBox(height: 10),
+                  Text('Price: \$${product.price?.toStringAsFixed(2) ?? 'N/A'}', style: TextStyle(color: kAccentColor, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 5),
+                  Text('Category: ${product.category ?? 'N/A'}'),
+                  SizedBox(height: 5),
+                  Text('Quantity in Stock: ${product.quantity?.toString() ?? 'N/A'}'),
+                  SizedBox(height: 5),
+                  Text('Pet Genre: ${product.petGenre ?? 'N/A'}'),
+                  SizedBox(height: 20),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ProductReviewsPage(product: product)),
+                        );
+                      },
+                      child: Text('View Reviews'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kAccentColor, // Use backgroundColor instead of primary
+                        foregroundColor: Colors.white, // Use foregroundColor instead of onPrimary
+                      ),
                     ),
                   ),
                 ],

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
-import '../../models/for_pet_owner/pet.dart';
+import '../../APiHandler.dart';
+import '../../models/for_pet_owner/Ownerpet.dart';
+
 
 class EditPetDetailsPage extends StatefulWidget {
   final Pet pet;
@@ -44,16 +46,51 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
     super.dispose();
   }
 
-  void _updatePetDetails() {
-    // Placeholder for API call to update pet details on the backend
-    Navigator.pop(context);
+  Future<void> _updatePetDetails() async {
+    // Update pet details in the backend
+    DateTime? dob;
+    try {
+      dob = DateTime.parse(_dobController.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Invalid date format. Please enter the date as YYYY-MM-DD.")),
+      );
+      return;
+    }
+
+    // Create a new pet instance with updated values
+    Pet updatedPet = Pet(
+      petId: widget.pet.petId,
+      ownerId: widget.pet.ownerId,
+      name: _nameController.text,
+      species: _speciesController.text,
+      breed: _breedController.text,
+      gender: _genderController.text,
+      dob: dob,
+      image: _imageData?? null,
+    );
+
+    // Call API to update the pet
+    bool success = await ApiHandler().updatePet(widget.pet.petId, updatedPet);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Pet details updated successfully!")),
+      );
+      Navigator.pop(context, updatedPet); // Pop with `true` if you need to indicate success
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update pet details.")),
+      );
+    }
   }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _imageData = File(pickedFile.path).readAsBytesSync();
+        _imageData = bytes;
       });
     }
   }
@@ -73,10 +110,10 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
                 onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.grey[200], // Default background color
+                  backgroundColor: Colors.grey[200],
                   backgroundImage: _imageData != null
-                      ? MemoryImage(_imageData!) as ImageProvider<Object>
-                      : AssetImage('assets/default_image.png') as ImageProvider<Object>,
+                      ? MemoryImage(_imageData!)
+                      : AssetImage('assets/default_image.png') as ImageProvider,
                   child: _imageData == null ? Icon(Icons.camera_alt, color: Colors.white70, size: 30) : null,
                 ),
               ),
@@ -101,7 +138,7 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
                 controller: _dobController,
                 decoration: InputDecoration(labelText: 'Date of Birth'),
                 onTap: () async {
-                  FocusScope.of(context).requestFocus(FocusNode()); // to prevent opening default keyboard
+                  FocusScope.of(context).requestFocus(FocusNode());
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: widget.pet.dob ?? DateTime.now(),
@@ -109,7 +146,7 @@ class _EditPetDetailsPageState extends State<EditPetDetailsPage> {
                     lastDate: DateTime.now(),
                   );
                   if (pickedDate != null) {
-                    _dobController.text = pickedDate.toIso8601String().split('T').first; // Update text field
+                    _dobController.text = pickedDate.toIso8601String().split('T').first;
                   }
                 },
               ),

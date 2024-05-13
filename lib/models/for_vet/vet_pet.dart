@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-class Pet {
+class Vet_Pet {
   final int id;
    String name;
    String? breed;
@@ -9,7 +9,7 @@ class Pet {
    String? ownerName;
    DateTime? dob;
 
-  Pet({
+  Vet_Pet({
     required this.id,
     required this.name,
     this.breed,
@@ -18,8 +18,8 @@ class Pet {
     this.dob,
   });
 
-  factory Pet.fromJson(Map<String, dynamic> json) {
-    return Pet(
+  factory Vet_Pet.fromJson(Map<String, dynamic> json) {
+    return Vet_Pet(
       id: json['id'] ,
       name: json['name'] ,
       breed: json['breed'] ?? '',

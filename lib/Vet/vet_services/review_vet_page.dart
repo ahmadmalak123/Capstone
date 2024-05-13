@@ -4,7 +4,6 @@ import '../../ApiHandler.dart';
 import '../../IdProvider.dart';
 import '../../models/for_vet/review.dart';
 import 'package:provider/provider.dart';
-
 // ReviewPage which displays a list of reviews
 class ReviewPage extends StatelessWidget {
   Future<List<Review>> _fetchProducts(BuildContext context) async {

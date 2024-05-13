@@ -16,7 +16,7 @@ class _PetShopPageState extends State<PetShopPage> {
   List<Product> products = [];
   String filter = 'All';
   String searchQuery = '';
-  final ApiHandler apiHandler = ApiHandler(); // Adjust this instantiation if your ApiHandler requires parameters
+  final ApiHandler apiHandler = ApiHandler();
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _PetShopPageState extends State<PetShopPage> {
 
   Future<void> fetchProducts() async {
     try {
-      var fetchedProducts = await apiHandler.getAllProducts(); // Make sure this method exists and is correctly implemented in your ApiHandler
+      var fetchedProducts = await apiHandler.getAllProducts();
       setState(() {
         products = fetchedProducts;
       });
@@ -39,7 +39,7 @@ class _PetShopPageState extends State<PetShopPage> {
     setState(() {
       filter = newFilter;
     });
-    fetchProducts(); // Refetch products based on the new filter
+    fetchProducts();
   }
 
   void searchProducts(String query) {
@@ -54,48 +54,36 @@ class _PetShopPageState extends State<PetShopPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Pet Shop', style: TextStyle(color: Colors.black)),
+        title: Text('Pet Shop', style: TextStyle(color: Colors.orange)),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  onChanged: searchProducts,
-                  decoration: InputDecoration(
-                    hintText: 'Search for products',
-                    contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                    border: InputBorder.none,
-                    suffixIcon: Icon(Icons.search),
+              padding: const EdgeInsets.all(20),
+              child: TextField(
+                onChanged: searchProducts,
+                decoration: InputDecoration(
+                  hintText: 'Search for products',
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.only(left: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
                   ),
+                  suffixIcon: Icon(Icons.search),
                 ),
               ),
             ),
-            SizedBox(height: 10),
             _buildFilterButtons(),
-            SizedBox(height: 20),
             _buildProductList(),
-            SizedBox(height: 100),
           ],
         ),
       ),
+      backgroundColor: Colors.white10,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -108,31 +96,31 @@ class _PetShopPageState extends State<PetShopPage> {
     );
   }
 
-
   Widget _buildFilterButtons() {
     List<String> categories = ['All', 'dogs', 'cats', 'fish', 'birds', 'reptiles'];
-    return Container(
-      height: 50,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((category) {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: ElevatedButton(
-              onPressed: () => updateFilter(categories[index]),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-              child: Text(categories[index]),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: FilterChip(
+              label: Text(category),
+              selected: filter == category,
+              onSelected: (bool selected) {
+                updateFilter(selected ? category : 'All');
+              },
+              backgroundColor: Colors.white,
+              selectedColor: Colors.orangeAccent,
+              showCheckmark: false,
+              checkmarkColor: Colors.white,
+              labelStyle: TextStyle(color: filter == category ? Colors.white : Colors.black),
             ),
           );
-        },
+        }).toList(),
       ),
     );
   }
-
 
   Widget _buildProductList() {
     // This method filters the products based on the current filter and search query
@@ -167,51 +155,63 @@ class _PetShopPageState extends State<PetShopPage> {
       },
     );
   }
+
   Widget _buildProductCard(Product product) {
     return Card(
-      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      margin: const EdgeInsets.all(6),  // Reduced margin
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: product.image != null ? Image.memory(
-              product.image!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/placeholder.png');  // Ensure you have a 'placeholder.png' in your assets
-              },
-            ) : Image.asset(
-              'assets/placeholder.png',  // Provide a local placeholder if no image is available
-              fit: BoxFit.cover,
+            flex: 3,  // Keeps proportion but gives more space if necessary
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+              child: product.image != null ? Image.memory(
+                product.image!,
+                fit: BoxFit.cover,
+              ) : Image.asset(
+                'assets/placeholder.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),  // Reduced padding
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,  // Reduces extra spacing
               children: [
                 Text(
                   product.name ?? "Unnamed Product",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),  // Potentially reduced font size
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   product.description ?? "No description available.",
-                  style: TextStyle(fontSize: 14),
-                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12),  // Reduced font size
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                SizedBox(height: 4),  // Reduced spacing
                 Text(
                   '\$${product.price?.toStringAsFixed(2) ?? 'N/A'}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),  // Adjusted font size
                 ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      cartItems.add(product.name!);  // Ensure 'name' is not null before adding
-                    });
-                  },
-                  child: Text('Add to Cart'),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        cartItems.add(product.name!);  // Ensure 'name' is not null before adding
+                      });
+                    },
+                    child: Text('Add to Cart', style: TextStyle(fontSize: 12)),  // Reduced font size on button
+                  ),
                 ),
               ],
             ),
@@ -220,4 +220,6 @@ class _PetShopPageState extends State<PetShopPage> {
       ),
     );
   }
+
+
 }

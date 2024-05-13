@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
     PetsPage(),
     PetShopPage(),
     ServicesPage(),
-    CalendarPage(),
+    AppointmentsPage(),
   ];
   void updateSelectedIndex(int index) {
     setState(() {

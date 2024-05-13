@@ -4,18 +4,49 @@ import '../../ApiHandler.dart';
 import '../../models/for_vet/review.dart';
 import 'rate_vet_page.dart';
 
-class VetReviewsPage extends StatelessWidget {
+class VetReviewsPage extends StatefulWidget {
   final int vetId;
   final String vetName;
 
   VetReviewsPage({required this.vetId, required this.vetName});
 
-  Future<List<Review>> _fetchReviews(BuildContext context) async {
+  @override
+  _VetReviewsPageState createState() => _VetReviewsPageState();
+}
+
+class _VetReviewsPageState extends State<VetReviewsPage> {
+  late Future<List<Review>> _reviewsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviewsFuture = _fetchReviews();
+  }
+
+  Future<List<Review>> _fetchReviews() async {
     try {
-      return ApiHandler().getReviewsByVetId(vetId);
+      return ApiHandler().getReviewsByVetId(widget.vetId);
     } catch (e) {
       print('Error fetching reviews: $e');
       return [];
+    }
+  }
+
+  void _navigateToRateVetPage() async {
+    // Receive the result from RateVetPage
+    final bool? newReviewAdded = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RateVetPage(vetId: widget.vetId, vetName: widget.vetName),
+
+      ),
+    );
+
+    // Check if a new review was added and refresh the reviews
+    if (newReviewAdded == true) {
+      setState(() {
+        _reviewsFuture = _fetchReviews();
+      });
     }
   }
 
@@ -26,40 +57,31 @@ class VetReviewsPage extends StatelessWidget {
         title: Text('Vet Reviews'),
       ),
       body: FutureBuilder<List<Review>>(
-        future: _fetchReviews(context),
+        future: _reviewsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (snapshot.data!.isEmpty) {
-            // No reviews found
             return Center(
               child: Text(
                 'There are no reviews on this vet.',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.grey),
               ),
             );
           } else {
             return ListView(
-              children: snapshot.data!.map((review) => _buildReviewCard(context, review)).toList(),
+              children: snapshot.data!
+                  .map((review) => _buildReviewCard(context, review))
+                  .toList(),
             );
           }
         },
       ),
       bottomNavigationBar: BottomAppBar(
         child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RateVetPage(vetName: vetName), // Use vetName here
-              ),
-            );
-          },
+          onPressed: _navigateToRateVetPage,
           child: Text('Rate Vet'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
