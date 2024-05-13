@@ -60,7 +60,7 @@ class ProductDetailPage extends StatelessWidget {
                       },
                       child: Text('View Reviews'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kAccentColor, // Use backgroundColor instead of primary
+                        backgroundColor: Colors.orangeAccent, // Use backgroundColor instead of primary
                         foregroundColor: Colors.white, // Use foregroundColor instead of onPrimary
                       ),
                     ),

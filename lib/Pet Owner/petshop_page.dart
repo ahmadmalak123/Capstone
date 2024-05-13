@@ -54,7 +54,7 @@ class _PetShopPageState extends State<PetShopPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Pet Shop', style: TextStyle(color: Colors.orange)),
+        title: Text('Pet Shop',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(

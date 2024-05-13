@@ -64,7 +64,7 @@ class _ServicesPageState extends State<ServicesPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Services'),
+        title: Text('Services',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
       ),
       body: SingleChildScrollView(
         child: Column(

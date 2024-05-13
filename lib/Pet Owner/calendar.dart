@@ -65,7 +65,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Appointments'),
+        title: Text('Calendar',style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
       ),
       body: Column(
         children: [
@@ -93,7 +93,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: _getEventsForDay(_selectedDay).length,
               itemBuilder: (context, index) {
                 final event = _getEventsForDay(_selectedDay)[index];
@@ -108,15 +108,23 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                       } else if (snapshot.hasError) {
                         return Text('Error loading pet details');
                       } else {
-                        return Text('${event.category}: ${event.status} at ${TimeOfDay.fromDateTime(event.appointmentDate)}/(for ${snapshot.data})');
+                        return Text('${event.category}: ${event.status} at ${TimeOfDay.fromDateTime(event.appointmentDate)} (for ${snapshot.data})');
                       }
                     },
                   ),
                 );
-
               },
+              separatorBuilder: (context, index) => Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0), // Adjust padding to control the length of the divider
+                child: Divider(
+                  color: Colors.grey, // You can change the color to match your design
+                  height: 1, // Can be adjusted to change the space around the divider
+                  thickness: 1, // Can adjust the thickness of the divider
+                ),
+              ),
             ),
           ),
+
         ],
       ),
     );
